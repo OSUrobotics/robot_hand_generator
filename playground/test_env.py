@@ -1,0 +1,200 @@
+
+from asyncio.constants import SENDFILE_FALLBACK_READBUFFER_SIZE
+from tracemalloc import start
+from bpy import data, context
+import bpy
+import mathutils
+import bmesh
+import numpy as np
+import os
+#test
+
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete(use_global=False)
+
+
+def test_bezier():
+
+
+    bottom_bezier_verts = bezier_curve([-1.0,0.0,0.0],[-1.0,1.0,0.0],[1.0,1.0,0.0],[1.0,0.0,0.0])
+
+    faces1 = tuple(range(len(bottom_bezier_verts)))
+
+    top_bezier_verts = bezier_curve([-1.0,0.0,1.0],[-1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,0.0,1.0])
+
+    #   verts3
+
+
+    verts = bottom_bezier_verts + top_bezier_verts
+    faces2 = tuple(range(len(bottom_bezier_verts),len(verts)))
+    #   faces2 = tuple(range(len(verts)-1, len(bottom_bezier_verts)-1, -1))
+    face_back = (0, len(bottom_bezier_verts)-1, len(verts)-1, len(bottom_bezier_verts))
+    faces = [faces1, faces2,face_back]
+
+    #   side_faces = [tuple(range(0, len(verts),1))]
+    offset = len(bottom_bezier_verts)
+
+    side_faces = []
+    for i in range(len(bottom_bezier_verts) -1):
+        side_faces.append((i+1, i, offset+i, offset + 1+i))
+    #   
+    faces += side_faces
+    return  verts, faces
+
+def triangle():
+
+    verts = [(1,0,0), (.5,.75,0), (0,1,0), (-.5,.75,0), (-1,0,0),(-1,0,1), (-.5,.75,1), (0,1,1), (.5,.75,1), (1,0,1)]
+    #    faces = [(0,1,2,3,4,5)]
+    faces = [tuple(range(len(verts)))]
+    return verts, faces
+
+
+def export_part(name):
+    """
+    export the object as an obj file
+    Input: name: name of object you wish to export
+    """
+    name += '.obj'
+    target_file = os.path.join('./test_obj', name)
+    bpy.ops.export_scene.obj(filepath=target_file, use_triangles=True, path_mode='COPY')
+
+
+class PalmGenerator:
+    def __init__(self):
+
+        pass
+
+    def cylinder_palm(self):
+        pass
+    
+    def square_palm(self, center_location, dimentions):
+        center_location
+
+        start_stop_verts_dict = {}
+        verts = []
+        top_verts = [
+            (-1*dimentions[0]/2, dimentions[1]/2, dimentions[2]/2), 
+            (-1*dimentions[0]/2, -1*dimentions[1]/2, dimentions[2]/2),
+            (dimentions[0]/2, -1*dimentions[1]/2, dimentions[2]/2),
+            (dimentions[0]/2, dimentions[1]/2, dimentions[2]/2)]
+        
+        verts += top_verts
+        start_stop_verts_dict['top_verts'] = (0, len(verts)-1)
+
+        bottom_verts = [
+            (-1*dimentions[0]/2, dimentions[1]/2, -1*dimentions[2]/2), 
+            (-1*dimentions[0]/2, -1*dimentions[1]/2, -1*dimentions[2]/2),
+            (dimentions[0]/2, -1*dimentions[1]/2, -1*dimentions[2]/2),
+            (dimentions[0]/2, dimentions[1]/2, -1*dimentions[2]/2)]
+        verts += bottom_verts
+        
+        start_stop_verts_dict['bottom_verts'] = (len(top_verts), len(verts)-1)
+        
+        top_face = [(0, 1, 2, 3)]
+        bottom_face = [tuple(range(start_stop_verts_dict['bottom_verts'][1], start_stop_verts_dict['bottom_verts'][0]-1, -1))]
+
+
+
+        side_faces = []
+        for i in range(4):
+            start_stop_verts_dict['top_verts']
+
+
+        faces = top_face + bottom_face #+ side_faces
+        return verts, faces
+
+
+def bezier_curve(p1, p2, p3, p4):
+    points = []
+    for t in np.arange(0.0, 1.01, 0.01):
+        points.append([
+        (((1 - t) ** 3) * p1[0]) + (3*((1-t)**2) * t * p2[0]) + (3*(1-t) * (t ** 2) *p3[0]) + (t**3 * p4[0]),
+        (((1 - t) ** 3) * p1[1]) + (3*((1-t)**2) * t * p2[1]) + (3*(1-t) * (t ** 2) *p3[1]) + (t**3 * p4[1]),
+        (((1 - t) ** 3) * p1[2]) + (3*((1-t)**2) * t * p2[2]) + (3*(1-t) * (t ** 2) *p3[2]) + (t**3 * p4[2])])
+    return points
+
+
+def test_bezier_top(
+    front_bottom = [[-0.5, 0.0, 0.0], [-0.5, 0.2, 0.0] , [0.5, 0.2, 0.0], [0.5, 0.2, 0.0]], 
+    front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.2, 1.0] , [0.5, 0.2, 1.0], [0.5, 0.2, 1.0]], 
+    top = [0.2, 0.2],
+    thickness = 1):
+    
+    # bottom_bezier_verts = bezier_curve([-1.0, 0.0, 0.0], [-1.0, front_bottom[0], 0.0], [1.0, front_bottom[1], 0.0], [1.0, 0.0, 0.0])
+    # top_bezier_verts = bezier_curve([-1.0, 0.0, 1.0], [-1.0, front[0], 1.0], [1.0, front[1], 1.0], [1.0, 0.0, 1.0])
+
+    bottom_bezier_verts = bezier_curve(front_bottom[0], front_bottom[1], front_bottom[2], front_bottom[3])
+    top_bezier_verts = bezier_curve(front_top[0], front_top[1], front_top[2], front_top[3])
+    verts = bottom_bezier_verts + top_bezier_verts
+
+    top_verts = []
+    for i in top_bezier_verts:
+        top_verts.append(bezier_curve([i[0], i[1], i[2]], [i[0], i[1], i[2] + top[0]], [i[0], -1.0, i[2] + top[1]], [i[0], -1.0, i[2]]))
+    
+    start_points = []
+    end_points = []
+    for vert_list in top_verts:
+        start_points.append(len(verts))
+        verts += vert_list
+        end_points.append(len(verts)-1)
+
+    verts += [(front_bottom[0][0], -1 * thickness, front_bottom[0][-1]), (front_bottom[-1][0], -1 * thickness, front_bottom[-1][-1])]
+    
+    bottom_face = [tuple(range((len(bottom_bezier_verts)-1))) + (len(verts) - 1, len(verts) - 2)]
+
+    side_face1 = tuple(range(end_points[0], start_points[0], -1)) + (0, len(verts)-2)
+    side_face2 = tuple(range(start_points[-1], end_points[-1],)) + (len(verts) - 1, len(bottom_bezier_verts)-1)
+    
+    back_face = [(len(verts)-2, len(verts)-1, end_points[-1], end_points[0])]
+
+    top_faces = []
+    for i in range(len(top_verts)-1):
+        for j in range(len(top_verts[i])-1):
+            top_faces.append((j + start_points[i], j + 1 + start_points[i], j + 1 + start_points[i + 1], j + start_points[i + 1]))
+
+    # faces = [faces1, faces2, face_back]
+
+    #   side_faces = [tuple(range(0, len(verts),1))]
+    offset = len(bottom_bezier_verts)
+
+    front_faces = []
+    for i in range(len(bottom_bezier_verts) -1):
+        front_faces.append((i+1, i, offset+i, offset + 1+i))
+    
+    faces = []
+    faces += front_faces
+    faces += top_faces
+    faces += bottom_face
+    faces += [side_face1]
+    faces += [side_face2]
+    faces += back_face
+    
+    return  verts, faces
+
+if __name__ == '__main__':
+
+    # verts, faces = test_bezier()
+
+
+    # verts, faces = test_bezier_top(
+    #     front_bottom = [[-0.5, 0.0, 0.0], [-0.5, 0.20, 0.0] , [0.5, 0.20, 0.0], [0.5, 0.0, 0.0]], 
+    #     front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.20, 1.0] , [0.5, 0.20, 1.0], [0.5, 0.0, 1.0]], 
+    #     top = [2, 1],
+    #     thickness= 1)
+
+    test = PalmGenerator()
+    verts, faces = test.square_palm([0,0,0], [1,1,1] )
+
+    #   verts, faces = triangle()
+    edges = []
+    mesh_name = "Cube"
+    mesh_data = data.meshes.new(mesh_name)
+    mesh_data.from_pydata(verts,edges,faces)
+    bm = bmesh.new()
+    bm.from_mesh(mesh_data)
+    bm.to_mesh(mesh_data)
+    bm.free()
+    mesh_obj = data.objects.new(mesh_data.name, mesh_data)
+    context.collection.objects.link(mesh_obj)
+
+    export_part('testing')
