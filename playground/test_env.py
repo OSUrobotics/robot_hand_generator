@@ -59,7 +59,13 @@ def export_part(name):
     bpy.ops.export_scene.obj(filepath=target_file, use_triangles=True, path_mode='COPY')
 
 
-class FingerSegment():
+class JointGenerator:
+    def __init__(self):
+        pass
+
+
+
+class FingerSegmentGenerator():
     def __init__(self):
         pass
 
@@ -71,6 +77,8 @@ class FingerSegment():
         start_stop_verts = {}
         verts = []
         faces = []
+
+
 
 
         return verts, faces
@@ -324,7 +332,7 @@ if __name__ == '__main__':
         # top = [2, 1],
         # thickness= 1)
 
-    test = FingerSegment()
+    test = FingerSegmentGenerator()
     verts, faces = test.distal_segment_generator(
         front_bottom=[[-0.5, 0.0, 0.0], [-0.5, 0.20, 0.0] , [0.5, 0.20, 0.0], [0.5, 0.0, 0.0]], 
         front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.20, 1.0] , [0.5, 0.20, 1.0], [0.5, 0.0, 1.0]], 
