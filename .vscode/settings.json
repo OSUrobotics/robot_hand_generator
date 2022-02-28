@@ -1,6 +1,0 @@
-{
-    "python.pythonPath": "/root/software/blender-2.93/2.93/python/bin/python3.9",
-    "python.linting.pycodestyleEnabled": false,
-    "python.linting.pydocstyleEnabled": true,
-    "python.linting.enabled": true
-}
