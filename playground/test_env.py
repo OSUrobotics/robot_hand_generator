@@ -390,12 +390,12 @@ if __name__ == '__main__':
 	#     thickness= 1)
 
 	test = PalmGenerator()
-	# verts, faces = test.square_palm([0,0,0], [3,2,1])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
+	verts, faces = test.square_palm([0,0,0], [3,2,1])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
 
 	# verts,faces = test.cylinder_palm([0,0,0], [3,2,2])
 
-	test_joint = JointGenerator()
-	verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
+	# test_joint = JointGenerator()
+	# verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
 
 	#   verts, faces = triangle()
 	edges = []
