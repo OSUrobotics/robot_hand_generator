@@ -81,8 +81,13 @@ class JointGenerator:
 		back_verts = []
 		joint_raduis = joint_dimensions['depth'] / 2
 		half_joint_width = joint_dimensions['width'] / 2
-		for x_loc in np.arange(center_location[0] - joint_raduis, center_location[0] + joint_raduis, .01 ):
-			z_loc = (joint_raduis**2 - x_loc**2) ** 0.5 + center_location[2]
+		joint_length_half = .5 / 2
+		for x_loc in np.arange(center_location[0] - joint_raduis, center_location[0] + joint_raduis, .001 ):
+			# z_loc = (joint_raduis**2 - x_loc**2) ** 0.5 + center_location[2]
+			z_loc = (joint_length_half**2 * (1 - (x_loc - center_location[0])**2 / joint_raduis**2))**.5 + center_location[2]
+
+			# y = ((dimensions[1]/2)**2 * (1 - ((rounded_x-center_location[0])**2)/(dimensions[0]/2)**2)) ** 0.5 + center_location[1]
+
 			front_verts.append((x_loc, center_location[1] - half_joint_width, z_loc))
 			back_verts.append((x_loc, center_location[1] + half_joint_width, z_loc))
 		
@@ -92,17 +97,21 @@ class JointGenerator:
 		verts += back_verts
 		start_stop_verts['back_verts'] = (start_stop_verts['front_verts'][1]+1, len(verts)-1)
 
-		front_face = [tuple(range(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1] + 1, 1))]
-		back_face = [tuple(range(start_stop_verts['back_verts'][1], start_stop_verts['back_verts'][0] - 1, 1))]
+		back_face = [tuple(range(start_stop_verts['back_verts'][0], start_stop_verts['back_verts'][1] + 1, 1))]
+		front_face = [tuple(range(start_stop_verts['front_verts'][1], start_stop_verts['front_verts'][0] - 1, -1))]
 
 		top_faces = []
 		for loc in range(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1], 1):
-			top_faces.append((verts[loc], start_stop_verts['front_verts'][loc + 1], start_stop_verts['back_verts'][loc+1], start_stop_verts['back_verts'][loc]))
+			top_faces.append((start_stop_verts['front_verts'][0] + loc, start_stop_verts['front_verts'][0] + loc + 1, start_stop_verts['back_verts'][0] + loc +1, start_stop_verts['back_verts'][0]+loc))
 		
+		bottom_face = [(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1]+1, start_stop_verts['back_verts'][1]+1, start_stop_verts['back_verts'][0])]
 
 		faces += front_face
 		faces += back_face
 		faces += top_faces
+		# faces += bottom_face
+
+		# print(f"\n\n\n {verts} \n\n\n")
 
 
 
@@ -125,8 +134,8 @@ class FingerSegmentGenerator():
 		front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.2, 1.0] , [0.5, 0.2, 1.0], [0.5, 0.2, 1.0]]):
 		
 		start_stop_verts = {}
-		verts = []
-		faces = []
+		verts = [(0.5,0.5,0), (-0.5, 0.5, 0), (-0.5, -0.5, 0), (0.5, -0.5, 0), (0.5,0.5,1), (-0.5, 0.5, 1), (-0.5, -0.5, 1), (0.5, -0.5, 1)]
+		faces = [(0,1,2,3), (4,5,6,7), (0,1,4,5), (1,2,5,6), (2,3,6,7), (3,0,7,4)]
 
 
 
@@ -371,35 +380,64 @@ def bezier_curve(p1, p2, p3, p4):
 	
 #     return  verts, faces
 
+def join_parts(names, new_name):
+    """
+    Combine multiple objects together
+    Inputs: names: the names of the objects to be combined
+            new_name: what to name the new object
+    """
+
+    for i in range(len(names) - 1):
+        bpy.data.objects[names[i]].select_set(True)
+    
+    bpy.context.view_layer.objects.active = bpy.data.objects[names[-1]]
+    bpy.ops.object.join()
+    bpy.context.selected_objects[0].name = new_name
+
 if __name__ == '__main__':
 
 	# verts, faces = test_bezier()
 
 
 	# verts, faces = test_bezier_top(
-		# front_bottom = [[-0.5, 0.0, 0.0], [-0.5, 0.20, 0.0] , [0.5, 0.20, 0.0], [0.5, 0.0, 0.0]], 
-		# front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.20, 1.0] , [0.5, 0.20, 1.0], [0.5, 0.0, 1.0]], 
-		# top = [2, 1],
-		# thickness= 1)
+	# 	front_bottom = [[-0.5, 0.0, 0.0], [-0.5, 0.20, 0.0] , [0.5, 0.20, 0.0], [0.5, 0.0, 0.0]], 
+	# 	front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.20, 1.0] , [0.5, 0.20, 1.0], [0.5, 0.0, 1.0]], 
+	# 	top = [2, 1],
+	# 	thickness= 1)
 
 	# test = FingerSegmentGenerator()
+	# verts, faces = test.finger_segment_generator()
 	# verts, faces = test.distal_segment_generator(
 	#     front_bottom=[[-0.5, 0.0, 0.0], [-0.5, 0.20, 0.0] , [0.5, 0.20, 0.0], [0.5, 0.0, 0.0]], 
 	#     front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.20, 1.0] , [0.5, 0.20, 1.0], [0.5, 0.0, 1.0]], 
 	#     top = [[0, 0, .4], [0, 0, .4]],
 	#     thickness= 1)
 
-	test = PalmGenerator()
-	verts, faces = test.square_palm([0,0,0], [3,2,1])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
+	# test = PalmGenerator()
+	# verts, faces = test.square_palm([0,0,0], [1,1,2])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
 
-	# verts,faces = test.cylinder_palm([0,0,0], [3,2,2])
+	# # verts,faces = test.cylinder_palm([0,0,0], [3,2,2])
 
-	# test_joint = JointGenerator()
-	# verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
+	# # test_joint = JointGenerator()
+	# # verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
 
-	#   verts, faces = triangle()
+	# #   verts, faces = triangle()
+	# edges = []
+	# mesh_name = "segment"
+	# mesh_data = data.meshes.new(mesh_name)
+	# mesh_data.from_pydata(verts,edges,faces)
+	# bm = bmesh.new()
+	# bm.from_mesh(mesh_data)
+	# bm.to_mesh(mesh_data)
+	# bm.free()
+	# mesh_obj = data.objects.new(mesh_data.name, mesh_data)
+	# context.collection.objects.link(mesh_obj)
+
+	test_joint = JointGenerator()
+	verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
+
 	edges = []
-	mesh_name = "test"
+	mesh_name = "top"
 	mesh_data = data.meshes.new(mesh_name)
 	mesh_data.from_pydata(verts,edges,faces)
 	bm = bmesh.new()
@@ -408,6 +446,8 @@ if __name__ == '__main__':
 	bm.free()
 	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
 	context.collection.objects.link(mesh_obj)
+
+	# join_parts(["segment", "top"], "finger")
 
 	# translate_part(mesh_name, (0,2,0))
 	export_part('testing')
