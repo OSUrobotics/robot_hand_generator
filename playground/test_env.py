@@ -82,14 +82,15 @@ class JointGenerator:
 		joint_raduis = joint_dimensions['depth'] / 2
 		half_joint_width = joint_dimensions['width'] / 2
 		joint_length_half = .5 / 2
-		for x_loc in np.arange(center_location[0] - joint_raduis, center_location[0] + joint_raduis, .001 ):
+		for x_loc in np.arange(center_location[0] - joint_raduis, center_location[0] + joint_raduis + 0.001, 0.001 ):
+			x_loc_use = np.round(x_loc,3)
 			# z_loc = (joint_raduis**2 - x_loc**2) ** 0.5 + center_location[2]
-			z_loc = (joint_length_half**2 * (1 - (x_loc - center_location[0])**2 / joint_raduis**2))**.5 + center_location[2]
+			z_loc = (joint_length_half**2 * (1 - (x_loc_use - center_location[0])**2 / joint_raduis**2))**.5 + center_location[2]
 
 			# y = ((dimensions[1]/2)**2 * (1 - ((rounded_x-center_location[0])**2)/(dimensions[0]/2)**2)) ** 0.5 + center_location[1]
 
-			front_verts.append((x_loc, center_location[1] - half_joint_width, z_loc))
-			back_verts.append((x_loc, center_location[1] + half_joint_width, z_loc))
+			front_verts.append((x_loc_use, center_location[1] - half_joint_width, z_loc))
+			back_verts.append((x_loc_use, center_location[1] + half_joint_width, z_loc))
 		
 		verts += front_verts
 		start_stop_verts['front_verts'] = (0, len(verts)-1)
@@ -381,18 +382,20 @@ def bezier_curve(p1, p2, p3, p4):
 #     return  verts, faces
 
 def join_parts(names, new_name):
-    """
-    Combine multiple objects together
-    Inputs: names: the names of the objects to be combined
-            new_name: what to name the new object
-    """
+	"""
+	Combine multiple objects together
+	Inputs: names: the names of the objects to be combined
+			new_name: what to name the new object
+	"""
 
-    for i in range(len(names) - 1):
-        bpy.data.objects[names[i]].select_set(True)
-    
-    bpy.context.view_layer.objects.active = bpy.data.objects[names[-1]]
-    bpy.ops.object.join()
-    bpy.context.selected_objects[0].name = new_name
+	# for i in range(len(names) - 1):
+	#     bpy.data.objects[names[i]].select_set(True)
+	for name in names:
+		bpy.data.objects[name].select_set(True)
+
+	bpy.context.view_layer.objects.active = bpy.data.objects[names[-1]]
+	bpy.ops.object.join()
+	bpy.context.selected_objects[0].name = new_name
 
 if __name__ == '__main__':
 
@@ -413,8 +416,8 @@ if __name__ == '__main__':
 	#     top = [[0, 0, .4], [0, 0, .4]],
 	#     thickness= 1)
 
-	# test = PalmGenerator()
-	# verts, faces = test.square_palm([0,0,0], [1,1,2])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
+	test = PalmGenerator()
+	verts, faces = test.square_palm([0,0,0], [1,1,2])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
 
 	# # verts,faces = test.cylinder_palm([0,0,0], [3,2,2])
 
@@ -422,16 +425,16 @@ if __name__ == '__main__':
 	# # verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
 
 	# #   verts, faces = triangle()
-	# edges = []
-	# mesh_name = "segment"
-	# mesh_data = data.meshes.new(mesh_name)
-	# mesh_data.from_pydata(verts,edges,faces)
-	# bm = bmesh.new()
-	# bm.from_mesh(mesh_data)
-	# bm.to_mesh(mesh_data)
-	# bm.free()
-	# mesh_obj = data.objects.new(mesh_data.name, mesh_data)
-	# context.collection.objects.link(mesh_obj)
+	edges = []
+	mesh_name = "segment"
+	mesh_data = data.meshes.new(mesh_name)
+	mesh_data.from_pydata(verts,edges,faces)
+	bm = bmesh.new()
+	bm.from_mesh(mesh_data)
+	bm.to_mesh(mesh_data)
+	bm.free()
+	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
+	context.collection.objects.link(mesh_obj)
 
 	test_joint = JointGenerator()
 	verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
@@ -447,7 +450,7 @@ if __name__ == '__main__':
 	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
 	context.collection.objects.link(mesh_obj)
 
-	# join_parts(["segment", "top"], "finger")
+	join_parts(["segment", "top"], "finger")
 
 	# translate_part(mesh_name, (0,2,0))
 	export_part('testing')
