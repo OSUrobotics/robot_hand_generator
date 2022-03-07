@@ -4,9 +4,11 @@ from tracemalloc import start
 from bpy import data, context
 import bpy
 import mathutils
+from mathutils import Matrix, Vector
 import bmesh
 import numpy as np
 import os
+from math import pi
 #test
 
 bpy.ops.object.select_all(action='SELECT')
@@ -67,7 +69,7 @@ class JointGenerator:
 	def __init__(self):
 		pass
 
-	def pin_joint_top(self, center_location, joint_dimensions):
+	def pin_joint_top(self, center_location, joint_dimensions=[1,1,0.5], orientation=0):
 		
 		# This will be a half cylinder that the front will be deviate a little to match the bezier curve profile of the segment's top that it will attach to.
 		#Initially this wont match the bezier curve
@@ -79,9 +81,9 @@ class JointGenerator:
 
 		front_verts = []
 		back_verts = []
-		joint_raduis = joint_dimensions['depth'] / 2
-		half_joint_width = joint_dimensions['width'] / 2
-		joint_length_half = .5 / 2
+		joint_raduis = joint_dimensions[1] / 2
+		half_joint_width = joint_dimensions[0] / 2
+		joint_length_half = joint_dimensions[2] / 2
 		for x_loc in np.arange(center_location[0] - joint_raduis, center_location[0] + joint_raduis + 0.001, 0.001 ):
 			x_loc_use = np.round(x_loc,3)
 			# z_loc = (joint_raduis**2 - x_loc**2) ** 0.5 + center_location[2]
@@ -89,8 +91,8 @@ class JointGenerator:
 
 			# y = ((dimensions[1]/2)**2 * (1 - ((rounded_x-center_location[0])**2)/(dimensions[0]/2)**2)) ** 0.5 + center_location[1]
 
-			front_verts.append((x_loc_use, center_location[1] - half_joint_width, z_loc))
-			back_verts.append((x_loc_use, center_location[1] + half_joint_width, z_loc))
+			front_verts.append(Vector((x_loc_use, center_location[1] - half_joint_width, z_loc)))
+			back_verts.append(Vector((x_loc_use, center_location[1] + half_joint_width, z_loc)))
 		
 		verts += front_verts
 		start_stop_verts['front_verts'] = (0, len(verts)-1)
@@ -114,15 +116,54 @@ class JointGenerator:
 
 		# print(f"\n\n\n {verts} \n\n\n")
 
-
+		rotation = Matrix.Rotation(orientation * pi/180.0, 4, Vector((0.0,0.0,1.0)))
+		for i in range(len(verts)):
+			verts[i] = rotation @ verts[i]
 
 
 		return verts, faces
 
-	def pin_joint_bottom(self):
+	def pin_joint_bottom(self, center_location=[0,0,0], joint_dimensions=[1,1,0.5]):
 		
 		# This is the stem or the part of the joint that attaches to the bottom of the segment
-		pass
+		start_stop_verts_dict = {}
+		verts = []
+		
+		top_verts = [
+			(center_location[0] + -1*joint_dimensions[0]/2, center_location[1] + joint_dimensions[1]/2, center_location[2] + joint_dimensions[2]), 
+			(center_location[0] + -1*joint_dimensions[0]/2, center_location[1] + -1*joint_dimensions[1]/2, center_location[2] + joint_dimensions[2]),
+			(center_location[0] + joint_dimensions[0]/2, center_location[1] + -1*joint_dimensions[1]/2, center_location[2] + joint_dimensions[2]),
+			(center_location[0] + joint_dimensions[0]/2, center_location[1] + joint_dimensions[1]/2, center_location[2] + joint_dimensions[2])]
+		verts += top_verts
+		start_stop_verts_dict['top_verts'] = (0, len(verts)-1)
+		bottom_verts = [
+			(center_location[0] + -1*joint_dimensions[0]/2, center_location[1]  + joint_dimensions[1]/2, center_location[2]), 
+			(center_location[0] + -1*joint_dimensions[0]/2, center_location[1] + -1*joint_dimensions[1]/2, center_location[2]),
+			(center_location[0] + joint_dimensions[0]/2, center_location[1] + -1*joint_dimensions[1]/2, center_location[2]),
+			(center_location[0] + joint_dimensions[0]/2, center_location[1] + joint_dimensions[1]/2, center_location[2])]
+		
+		verts += bottom_verts
+		
+		start_stop_verts_dict['bottom_verts'] = (len(top_verts), len(verts)-1)
+		
+		# bottom_face = [(3,2,1,0)]
+		bottom_face = [tuple(range(start_stop_verts_dict['bottom_verts'][1], start_stop_verts_dict['bottom_verts'][0]-1, -1))]
+
+
+		top_vertex = range(start_stop_verts_dict['top_verts'][0], start_stop_verts_dict['top_verts'][1] + 1)
+		bottom_vertex = range(start_stop_verts_dict['bottom_verts'][0], start_stop_verts_dict['bottom_verts'][1] + 1)
+		side_faces = []
+		for i in range(4):
+			side_faces.append((
+				top_vertex[i -1],
+				bottom_vertex[i -1],
+				bottom_vertex[i],
+				top_vertex[i]))
+		faces = []
+		faces += bottom_face
+		faces += side_faces
+		# faces += top_face
+		return verts, faces
 
 
 class FingerSegmentGenerator():
@@ -417,7 +458,7 @@ if __name__ == '__main__':
 	#     thickness= 1)
 
 	test = PalmGenerator()
-	verts, faces = test.square_palm([0,0,0], [1,1,2])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
+	verts, faces = test.square_palm([0,0,2.5], [1,1,2])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
 
 	# # verts,faces = test.cylinder_palm([0,0,0], [3,2,2])
 
@@ -437,7 +478,7 @@ if __name__ == '__main__':
 	context.collection.objects.link(mesh_obj)
 
 	test_joint = JointGenerator()
-	verts, faces = test_joint.pin_joint_top([0,0,0], {'width': 1, 'depth': 1})
+	verts, faces = test_joint.pin_joint_top([0,0,2.5], [1, 1, 0.5], orientation=10.0)
 
 	edges = []
 	mesh_name = "top"
@@ -450,7 +491,22 @@ if __name__ == '__main__':
 	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
 	context.collection.objects.link(mesh_obj)
 
-	join_parts(["segment", "top"], "finger")
+	test_joint = JointGenerator()
+	verts, faces = test_joint.pin_joint_bottom([0,0,0], [0.4, .9, 0.5])
+
+	edges = []
+	mesh_name = "bottom"
+	mesh_data = data.meshes.new(mesh_name)
+	mesh_data.from_pydata(verts,edges,faces)
+	bm = bmesh.new()
+	bm.from_mesh(mesh_data)
+	bm.to_mesh(mesh_data)
+	bm.free()
+	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
+	context.collection.objects.link(mesh_obj)
+
+	join_parts(["segment", "top", "bottom"], "finger")
+	# bpy.types.Mesh.calc_loop_triangles()
 
 	# translate_part(mesh_name, (0,2,0))
 	export_part('testing')

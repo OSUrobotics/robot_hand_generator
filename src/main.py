@@ -15,7 +15,7 @@ class MainScript():
 
     def run_blender(self, json_name):
 
-        subprocess.run(f'{self.directory_dict["blender_location"]} --background --python generator.py {json_name}', shell=True)
+        subprocess.run(f'{self.directory_dict["blender_location"]} --background --python generator.py {json_name}', shell=True) # --background
 
     def get_files_from_queue(self):
         
