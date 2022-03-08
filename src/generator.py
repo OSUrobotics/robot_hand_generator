@@ -1,6 +1,5 @@
 #!~/software/blender-2.93/2.93/python/bin/python3.9
-from curses.panel import top_panel
-from tkinter import S
+
 from bpy import data, context
 import bpy
 import mathutils
@@ -36,7 +35,7 @@ class HandGenerator():
 
 		for finger_number in range(self.hand_dict["palm"]["finger_qty"]):
 			finger_list.append(FingerGenerator(self.hand_dict[f'finger_{finger_number}'], run_trigger=True))
-		
+		self.mesh_queue["fingers"] = finger_list
 		self.create_meshes()
 		
 	def create_meshes(self):
@@ -50,6 +49,16 @@ class HandGenerator():
 			names.append(f"palm_joint_{i}")
 		HF.join_parts(names, "palm")
 		HF.export_part("palm", "./")
+		HF.delete_all()
+		
+		segment = self.mesh_queue["fingers"][0].segments[0]
+		
+		# for finger_number
+		HF.blender_make_mesh(segment.verts, segment.faces, "segment")
+		HF.blender_make_mesh(segment.segment_joint[0].verts, segment.segment_joint[0].faces, "bottom")
+		HF.blender_make_mesh(segment.segment_joint[1].verts, segment.segment_joint[1].faces, "top")
+		HF.join_parts(["bottom", "top", "segment"], "finger")
+		HF.export_part("finger", "./")
 
 
 class PalmGenerator():
@@ -72,7 +81,7 @@ class PalmGenerator():
 		# joint_list = []
 		for joint_number in range(self.palm_dict["finger_qty"]):
 			distance, angle, _ = self.palm_dict["palm_joints"][f'finger_{joint_number}']["joint_pose"]
-			bottom_center_xyz = [distance * cos(angle*pi/180), distance * sin(angle*pi/180), 0]
+			bottom_center_xyz = [distance * sin(angle*pi/180),distance * cos(angle*pi/180), 0]
 			self.joint_list.append(JointGenerator(self.palm_dict["palm_joints"][f'finger_{joint_number}'], bottom_center_xyz=bottom_center_xyz, joint_bottom=True, run_trigger=True))
 		
 	
@@ -217,44 +226,44 @@ class JointGenerator():
 
 		front_verts = []
 		back_verts = []
-		joint_raduis = depth / 2
-		half_joint_width = width / 2
-		joint_length_half = length / 2
-		front_verts.append(Vector(( -1*joint_raduis, -1* half_joint_width, 0)))
-		back_verts.append(Vector(( -1*joint_raduis,  half_joint_width, 0)))
+		joint_raduis = depth / 2  # blender y-axis
+		half_joint_width = width / 2  # blender x-axis
+		joint_length_half = length / 2 # blender z-axis
+		front_verts.append(Vector((-1* half_joint_width, -1*joint_raduis, 0)))
+		back_verts.append(Vector((half_joint_width, -1*joint_raduis, 0)))
 
-		for x_loc in np.arange(-1*joint_raduis + 0.001, joint_raduis - 0.001, 0.001):
-			x_loc_use = np.round(x_loc,3)
+		for y_loc in np.arange(-1*joint_raduis + 0.001, joint_raduis - 0.001, 0.001):
+			y_loc_use = np.round(y_loc,3)
 			
 			# z_loc = (joint_raduis**2 - x_loc**2) ** 0.5 + self.bottom_center_xyz[2]
-			z_loc = (joint_length_half**2 * (1 - (x_loc_use - 0)**2 / joint_raduis**2))**.5 + 0
-			print(f'x: {x_loc_use}, z: {z_loc}')
+			z_loc = (joint_length_half**2 * (1 - (y_loc_use - 0)**2 / joint_raduis**2))**.5 + 0
+			# print(f'y: {y_loc_use}, z: {z_loc}')
 			# y = ((dimensions[1]/2)**2 * (1 - ((rounded_x-self.bottom_center_xyz[0])**2)/(dimensions[0]/2)**2)) ** 0.5 + self.bottom_center_xyz[1]
 
-			front_verts.append(Vector((x_loc_use, -1* half_joint_width, z_loc)))
-			back_verts.append(Vector((x_loc_use, half_joint_width, z_loc)))
+			front_verts.append(Vector(( -1* half_joint_width, y_loc_use, z_loc)))
+			back_verts.append(Vector((half_joint_width, y_loc_use, z_loc)))
 
-		front_verts.append(Vector((joint_raduis, -1*half_joint_width, 0)))
-		back_verts.append(Vector((joint_raduis, half_joint_width, 0)))
+		front_verts.append(Vector((-1*half_joint_width, joint_raduis, 0)))
+		back_verts.append(Vector((half_joint_width, joint_raduis, 0)))
 		self.verts += front_verts
 		start_stop_verts['front_verts'] = (0, len(self.verts)-1)
 		
 		self.verts += back_verts
 		start_stop_verts['back_verts'] = (start_stop_verts['front_verts'][1]+1, len(self.verts)-1)
 
-		back_face = [tuple(range(start_stop_verts['back_verts'][0], start_stop_verts['back_verts'][1] + 1, 1))]
-		front_face = [tuple(range(start_stop_verts['front_verts'][1], start_stop_verts['front_verts'][0] - 1, -1))]
+		back_face = [tuple(range(start_stop_verts['back_verts'][1], start_stop_verts['back_verts'][0] - 1, -1))]
+		front_face = [tuple(range(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1] + 1, 1))]
 
 		top_faces = []
 		for loc in range(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1], 1):
-			top_faces.append((start_stop_verts['front_verts'][0] + loc, start_stop_verts['front_verts'][0] + loc + 1, start_stop_verts['back_verts'][0] + loc +1, start_stop_verts['back_verts'][0]+loc))
+			top_faces.append((start_stop_verts['front_verts'][0] + loc, start_stop_verts['back_verts'][0] + loc, start_stop_verts['back_verts'][0]+loc + 1, start_stop_verts['front_verts'][0] + loc + 1))
 		
 		bottom_face = [(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1]+1, start_stop_verts['back_verts'][1]+1, start_stop_verts['back_verts'][0])]
 
 		self.faces += front_face
 		self.faces += back_face
 		self.faces += top_faces
-		# faces += bottom_face
+		self.faces += bottom_face
 
 		# print(f"\n\n\n {verts} \n\n\n")
 
@@ -270,31 +279,31 @@ class JointGenerator():
 
 	def pin_joint_top(self, orientation=0):
 		width, depth, joint_length = self.joint_dict["joint_dimensions"]
-		joint_width = width * .9
+		joint_width = width * 0.9
 		joint_depth = depth * 0.4
 		
 
 		start_stop_verts_dict = {}
-		verts = []
+		
 		
 		top_verts = [
-			Vector((self.bottom_center_xyz[0] + -1*joint_depth/2, self.bottom_center_xyz[1] + joint_width/2, self.bottom_center_xyz[2] + joint_length)), 
-			Vector((self.bottom_center_xyz[0] + -1*joint_depth/2, self.bottom_center_xyz[1] + -1*joint_width/2, self.bottom_center_xyz[2] + joint_length)),
-			Vector((self.bottom_center_xyz[0] + joint_depth/2, self.bottom_center_xyz[1] + -1*joint_width/2, self.bottom_center_xyz[2] + joint_length)),
-			Vector((self.bottom_center_xyz[0] + joint_depth/2, self.bottom_center_xyz[1] + joint_width/2, self.bottom_center_xyz[2] + joint_length))]
-		verts += top_verts
-		start_stop_verts_dict['top_verts'] = (0, len(verts)-1)
+			Vector(( joint_width/2,    -1*joint_depth/2,    joint_length)), 
+			Vector(( -1*joint_width/2, -1*joint_depth/2,    joint_length)),
+			Vector(( -1*joint_width/2, joint_depth/2,       joint_length)),
+			Vector(( joint_width/2,    joint_depth/2,       joint_length))]
+		self.verts += top_verts
+		start_stop_verts_dict['top_verts'] = (0, len(self.verts)-1)
 		bottom_verts = [
-			Vector((self.bottom_center_xyz[0] + -1*joint_depth/2, self.bottom_center_xyz[1]  + joint_width/2, self.bottom_center_xyz[2])), 
-			Vector((self.bottom_center_xyz[0] + -1*joint_depth/2, self.bottom_center_xyz[1] + -1*joint_width/2, self.bottom_center_xyz[2])),
-			Vector((self.bottom_center_xyz[0] + joint_depth/2, self.bottom_center_xyz[1] + -1*joint_width/2, self.bottom_center_xyz[2])),
-			Vector((self.bottom_center_xyz[0] + joint_depth/2, self.bottom_center_xyz[1] + joint_width/2, self.bottom_center_xyz[2]))]
+			Vector(( joint_width/2,    -1*joint_depth/2,  0)), 
+			Vector(( -1*joint_width/2, -1*joint_depth/2,  0)),
+			Vector(( -1*joint_width/2, joint_depth/2,     0)),
+			Vector(( joint_width/2,    joint_depth/2,     0))]
 		
-		verts += bottom_verts
+		self.verts += bottom_verts
 		
-		start_stop_verts_dict['bottom_verts'] = (len(top_verts), len(verts)-1)
+		start_stop_verts_dict['bottom_verts'] = (len(top_verts), len(self.verts)-1)
 		
-		bottom_face = [tuple(range(start_stop_verts_dict['bottom_verts'][1], start_stop_verts_dict['bottom_verts'][0]-1, -1))]
+		bottom_face = [tuple(range(start_stop_verts_dict['bottom_verts'][0], start_stop_verts_dict['bottom_verts'][1]+1, 1))]
 
 
 		top_vertex = range(start_stop_verts_dict['top_verts'][0], start_stop_verts_dict['top_verts'][1] + 1)
@@ -303,17 +312,17 @@ class JointGenerator():
 		for i in range(4):
 			side_faces.append((
 				top_vertex[i -1],
-				bottom_vertex[i -1],
+				top_vertex[i],
 				bottom_vertex[i],
-				top_vertex[i]))
-		faces = []
-		faces += bottom_face
-		faces += side_faces
+				bottom_vertex[i -1]))
+		# faces = []
+		self.faces += bottom_face
+		self.faces += side_faces
 		rotation = Matrix.Rotation(orientation * pi / 180.0, 4, Vector((0.0,0.0,1.0)))
-		for i in range(len(verts)):
-			verts[i] = rotation @ verts[i]
+		for i in range(len(self.verts)):
+			self.verts[i] = rotation @ self.verts[i]
 		
-		return verts, faces
+		# return verts, faces
 
 
 class FingerGenerator():
@@ -344,12 +353,12 @@ class FingerSegmentGenerator():
 		width, depth, length = self.segment_dict["segment_dimensions"]
 		bottom_joint_length = self.segment_dict["segment_bottom_joint"]["joint_dimensions"][2]
 		self.top_length = length + bottom_joint_length
-		self.segment_joint.append(JointGenerator(self.segment_joint["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False))
-		self.segment_joint.append(JointGenerator(self.segment_joint["segment_top_joint"], [0.0,0.0, self.top_length], joint_bottom=True))
+		# self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
+		# self.segment_joint.append(JointGenerator(self.segment_dict["segment_top_joint"], [0.0,0.0, self.top_length], joint_bottom=True, run_trigger=True))
 		segment_profiles = self.segment_dict["segment_profile"]
 		bottom_bezier_verts = HF.bezier_curve([width/2, 0, 0],
-												[segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2]],
-												[-1*segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2]],
+												[width/2 + segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2]],
+												[-1*width/2 + segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2]],
 												[-1*width/2, 0, 0])
 		self.verts += bottom_bezier_verts
 		start_stop_verts["bottom_bezier_verts"] = (0, len(self.verts)-1)
@@ -375,11 +384,12 @@ class FingerSegmentGenerator():
 		bottom_face = [tuple(range(start_stop_verts['bottom_bezier_verts'][1], start_stop_verts['bottom_bezier_verts'][0]-1, -1)) + (len(self.verts) - 1, len(self.verts) - 2)]
 		top_face = [tuple(range(start_stop_verts['top_bezier_verts'][0], start_stop_verts['top_bezier_verts'][1]+1)) + (len(self.verts)-3, len(self.verts)-4)]
 		side_faces = [(start_stop_verts['bottom_bezier_verts'][0], start_stop_verts['top_bezier_verts'][0], len(self.verts)-4, len(self.verts)-1),
-						(start_stop_verts['bottom_bezier_verts'][1], len(self.verts)-2, len(self.verts)-3, start_stop_verts['top_bezier_verts'][1])]
+						(start_stop_verts['bottom_bezier_verts'][1], len(self.verts)-2, len(self.verts)-3, start_stop_verts['top_bezier_verts'][1]),
+						(len(self.verts)-4, len(self.verts)-3, len(self.verts)-2, len(self.verts)-1)]
 
 		front_faces = []
 		offset = start_stop_verts['bottom_bezier_verts'][1]
-		for i in range(start_stop_verts['bottom_bezier_verts'][1]):
+		for i in range(1,start_stop_verts['bottom_bezier_verts'][1]+1):
 			front_faces.append((i, i+1, i+offset+1, i + offset))
 		
 		self.faces += bottom_face
@@ -391,6 +401,10 @@ class FingerSegmentGenerator():
 		translate = Matrix.Translation(Vector((0.0, bezier_y_offset, bottom_joint_length)))
 		for i in range(len(self.verts)):
 			self.verts[i] = translate @ self.verts[i]
+		
+		# self.segment_dict["segment_top_joint"]["joint_dimensions"][1] = remaining_depth
+		self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
+		self.segment_joint.append(JointGenerator(self.segment_dict["segment_top_joint"], [0.0,0.0, self.top_length], joint_bottom=True, run_trigger=True))
 		
 
 
