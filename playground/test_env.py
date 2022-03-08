@@ -449,16 +449,16 @@ if __name__ == '__main__':
 	# 	top = [2, 1],
 	# 	thickness= 1)
 
-	# test = FingerSegmentGenerator()
-	# verts, faces = test.finger_segment_generator()
-	# verts, faces = test.distal_segment_generator(
-	#     front_bottom=[[-0.5, 0.0, 0.0], [-0.5, 0.20, 0.0] , [0.5, 0.20, 0.0], [0.5, 0.0, 0.0]], 
-	#     front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.20, 1.0] , [0.5, 0.20, 1.0], [0.5, 0.0, 1.0]], 
-	#     top = [[0, 0, .4], [0, 0, .4]],
-	#     thickness= 1)
+	test = FingerSegmentGenerator()
+	verts, faces = test.finger_segment_generator()
+	verts, faces = test.distal_segment_generator(
+	    front_bottom=[[-0.5, 0.0, 0.0], [-0.5, 0.20, 0.0] , [0.5, 0.20, 0.0], [0.5, 0.0, 0.0]], 
+	    front_top = [[-0.5, 0.0, 1.0], [-0.5, 0.20, 1.0] , [0.5, 0.20, 1.0], [0.5, 0.0, 1.0]], 
+	    top = [[0, 0, .4], [0, 0, .4]],
+	    thickness= 1)
 
-	test = PalmGenerator()
-	verts, faces = test.square_palm([0,0,2.5], [1,1,2])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
+	# test = PalmGenerator()
+	# verts, faces = test.square_palm([0,0,2.5], [1,1,2])  # not sure if I want the orgin to be on the top or bottom of the palm leaning towards the top
 
 	# # verts,faces = test.cylinder_palm([0,0,0], [3,2,2])
 
@@ -477,35 +477,35 @@ if __name__ == '__main__':
 	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
 	context.collection.objects.link(mesh_obj)
 
-	test_joint = JointGenerator()
-	verts, faces = test_joint.pin_joint_top([0,0,2.5], [1, 1, 0.5], orientation=10.0)
+	# test_joint = JointGenerator()
+	# verts, faces = test_joint.pin_joint_top([0,0,2.5], [1, 1, 0.5], orientation=10.0)
 
-	edges = []
-	mesh_name = "top"
-	mesh_data = data.meshes.new(mesh_name)
-	mesh_data.from_pydata(verts,edges,faces)
-	bm = bmesh.new()
-	bm.from_mesh(mesh_data)
-	bm.to_mesh(mesh_data)
-	bm.free()
-	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
-	context.collection.objects.link(mesh_obj)
+	# edges = []
+	# mesh_name = "top"
+	# mesh_data = data.meshes.new(mesh_name)
+	# mesh_data.from_pydata(verts,edges,faces)
+	# bm = bmesh.new()
+	# bm.from_mesh(mesh_data)
+	# bm.to_mesh(mesh_data)
+	# bm.free()
+	# mesh_obj = data.objects.new(mesh_data.name, mesh_data)
+	# context.collection.objects.link(mesh_obj)
 
-	test_joint = JointGenerator()
-	verts, faces = test_joint.pin_joint_bottom([0,0,0], [0.4, .9, 0.5])
+	# test_joint = JointGenerator()
+	# verts, faces = test_joint.pin_joint_bottom([0,0,0], [0.4, .9, 0.5])
 
-	edges = []
-	mesh_name = "bottom"
-	mesh_data = data.meshes.new(mesh_name)
-	mesh_data.from_pydata(verts,edges,faces)
-	bm = bmesh.new()
-	bm.from_mesh(mesh_data)
-	bm.to_mesh(mesh_data)
-	bm.free()
-	mesh_obj = data.objects.new(mesh_data.name, mesh_data)
-	context.collection.objects.link(mesh_obj)
+	# edges = []
+	# mesh_name = "bottom"
+	# mesh_data = data.meshes.new(mesh_name)
+	# mesh_data.from_pydata(verts,edges,faces)
+	# bm = bmesh.new()
+	# bm.from_mesh(mesh_data)
+	# bm.to_mesh(mesh_data)
+	# bm.free()
+	# mesh_obj = data.objects.new(mesh_data.name, mesh_data)
+	# context.collection.objects.link(mesh_obj)
 
-	join_parts(["segment", "top", "bottom"], "finger")
+	# join_parts(["segment", "top", "bottom"], "finger")
 	# bpy.types.Mesh.calc_loop_triangles()
 
 	# translate_part(mesh_name, (0,2,0))

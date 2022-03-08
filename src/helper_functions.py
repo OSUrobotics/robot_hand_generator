@@ -3,8 +3,10 @@ import os
 from bpy import data, context
 import bpy
 import mathutils
+from mathutils import Vector
 import bmesh
 import json
+import numpy as np
 from pathlib import Path
 
 # class HelperFunctions():
@@ -41,16 +43,15 @@ def delete_all():
     bpy.ops.object.select_all(action='SELECT')  #deletes everything
     bpy.ops.object.delete(use_global=False)
 
-# def get_part(name, location):  # we no longer need the other file
-    # """
-    # Imports base objects from secondary blender file
-    # Inputs: name: object name
-    #         location: where to place the object in main blender enviroment
-    # """
-    # directory = self.directory + '/GripperComponents.blend/Object/' 
-    # bpy.ops.wm.append(filename=name, directory=directory)
-    # bpy.context.view_layer.objects.active = bpy.data.objects[name] 
-    # bpy.context.object.location = location
+def bezier_curve(p0, p1, p2, p3):
+	points = []
+	for t in np.arange(0.0, 1.01, 0.01):
+		points.append(Vector([
+		(((1 - t) ** 3) * p0[0]) + (3*((1-t)**2) * t * p1[0]) + (3*(1-t) * (t ** 2) *p2[0]) + (t**3 * p3[0]),
+		(((1 - t) ** 3) * p0[1]) + (3*((1-t)**2) * t * p1[1]) + (3*(1-t) * (t ** 2) *p2[1]) + (t**3 * p3[1]),
+		(((1 - t) ** 3) * p0[2]) + (3*((1-t)**2) * t * p1[2]) + (3*(1-t) * (t ** 2) *p2[2]) + (t**3 * p3[2])]))
+	return points
+
 
 def scale_part(name, scale):
     """

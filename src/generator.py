@@ -1,3 +1,6 @@
+#!~/software/blender-2.93/2.93/python/bin/python3.9
+from curses.panel import top_panel
+from tkinter import S
 from bpy import data, context
 import bpy
 import mathutils
@@ -8,12 +11,6 @@ import os
 import sys
 import json
 from math import sin, cos, tan, pi
-# sys.path.append(bpy.path.abspath("//")+'/root/robot_manipulator_generator/src') # this lets me call other scripts that I made
-
-# from helper_functions import HelperFunctions
-# from urdf_creator import UrdfGenerator
-
-# func = bpy.data.texts["helper_functions.py"].as_module()
 
 
 class MainGenerator():
@@ -23,10 +20,10 @@ class MainGenerator():
 		
 		HF.delete_all()
 
-		HnadGenerator(hand_dict=self.project_dict['hand'])
+		HandGenerator(hand_dict=self.project_dict['hand'])
 
 
-class HnadGenerator():
+class HandGenerator():
 	def __init__(self, hand_dict):
 		self.hand_dict = hand_dict
 		self.mesh_queue = {}
@@ -35,10 +32,10 @@ class HnadGenerator():
 	def main(self):
 		self.mesh_queue["palm"] = PalmGenerator(self.hand_dict["palm"], run_trigger=True)
 
-		# finger_list = []
+		finger_list = []
 
-		# for finger_number in range(self.hand_dict["palm"]["finger_qty"]):
-			# finger_list.append(FingerGenerator(self.hand_dict[f'finger_{finger_number}'], run_trigger=True))
+		for finger_number in range(self.hand_dict["palm"]["finger_qty"]):
+			finger_list.append(FingerGenerator(self.hand_dict[f'finger_{finger_number}'], run_trigger=True))
 		
 		self.create_meshes()
 		
@@ -79,25 +76,25 @@ class PalmGenerator():
 			self.joint_list.append(JointGenerator(self.palm_dict["palm_joints"][f'finger_{joint_number}'], bottom_center_xyz=bottom_center_xyz, joint_bottom=True, run_trigger=True))
 		
 	
-	def cuboid_palm(self, bottom_center_xyz=[0,0,0]):
+	def cuboid_palm(self):
 		dimensions = self.palm_dict["palm_dimensions"]
 		start_stop_verts_dict = {}
 		# verts = []
 
 		top_verts = [
-			Vector((self.bottom_center_xyz[0] + -1*dimensions[0]/2, self.bottom_center_xyz[1]  + dimensions[1]/2, self.bottom_center_xyz[2])), 
-			Vector((self.bottom_center_xyz[0] + -1*dimensions[0]/2, self.bottom_center_xyz[1] + -1*dimensions[1]/2, self.bottom_center_xyz[2])),
-			Vector((self.bottom_center_xyz[0] + dimensions[0]/2, self.bottom_center_xyz[1] + -1*dimensions[1]/2, self.bottom_center_xyz[2])),
-			Vector((self.bottom_center_xyz[0] + dimensions[0]/2, self.bottom_center_xyz[1] + dimensions[1]/2, self.bottom_center_xyz[2]))]
+			Vector((-1*dimensions[0]/2,  dimensions[1]/2,    0)), 
+			Vector((-1*dimensions[0]/2,  -1*dimensions[1]/2, 0)),
+			Vector((dimensions[0]/2,     -1*dimensions[1]/2, 0)),
+			Vector((dimensions[0]/2,     dimensions[1]/2,    0))]
 		
 		self.verts += top_verts
 		start_stop_verts_dict['top_verts'] = (0, len(self.verts)-1)
 
 		bottom_verts = [
-			Vector((self.bottom_center_xyz[0] + -1*dimensions[0]/2, self.bottom_center_xyz[1] + dimensions[1]/2, self.bottom_center_xyz[2] - dimensions[2])), 
-			Vector((self.bottom_center_xyz[0] + -1*dimensions[0]/2, self.bottom_center_xyz[1] + -1*dimensions[1]/2, self.bottom_center_xyz[2] - dimensions[2])),
-			Vector((self.bottom_center_xyz[0] + dimensions[0]/2, self.bottom_center_xyz[1] + -1*dimensions[1]/2, self.bottom_center_xyz[2] - dimensions[2])),
-			Vector((self.bottom_center_xyz[0] + dimensions[0]/2, self.bottom_center_xyz[1] + dimensions[1]/2, self.bottom_center_xyz[2] - dimensions[2]))]
+			Vector(( -1*dimensions[0]/2,  dimensions[1]/2,    -1* dimensions[2])), 
+			Vector(( -1*dimensions[0]/2,  -1*dimensions[1]/2, -1* dimensions[2])),
+			Vector(( dimensions[0]/2,     -1*dimensions[1]/2, -1* dimensions[2])),
+			Vector(( dimensions[0]/2,     dimensions[1]/2,    -1* dimensions[2]))]
 		self.verts += bottom_verts
 		
 		start_stop_verts_dict['bottom_verts'] = (len(top_verts), len(self.verts)-1)
@@ -117,6 +114,10 @@ class PalmGenerator():
 				top_vertex[i]))
 
 		self.faces = top_face + bottom_face + side_faces
+		translation = Matrix.Translation(Vector(self.bottom_center_xyz))
+		rotation = Matrix.Rotation(0.0, 4, Vector((0.0,0.0,1.0)))
+		for i in range(len(self.verts)):
+			self.verts[i] = translation @ rotation @ self.verts[i]
 		# return verts, faces
 
 	def cylinder_palm(self, bottom_center_xyz=[0,0,0]):
@@ -219,22 +220,22 @@ class JointGenerator():
 		joint_raduis = depth / 2
 		half_joint_width = width / 2
 		joint_length_half = length / 2
-		front_verts.append(Vector((self.bottom_center_xyz[0] - joint_raduis,self.bottom_center_xyz[1] - half_joint_width, self.bottom_center_xyz[2])))
-		back_verts.append(Vector((self.bottom_center_xyz[0] - joint_raduis, self.bottom_center_xyz[1] + half_joint_width, self.bottom_center_xyz[2])))
+		front_verts.append(Vector(( -1*joint_raduis, -1* half_joint_width, 0)))
+		back_verts.append(Vector(( -1*joint_raduis,  half_joint_width, 0)))
 
-		for x_loc in np.arange(self.bottom_center_xyz[0] - joint_raduis + 0.001, self.bottom_center_xyz[0] + joint_raduis - 0.001, 0.001):
+		for x_loc in np.arange(-1*joint_raduis + 0.001, joint_raduis - 0.001, 0.001):
 			x_loc_use = np.round(x_loc,3)
 			
 			# z_loc = (joint_raduis**2 - x_loc**2) ** 0.5 + self.bottom_center_xyz[2]
-			z_loc = (joint_length_half**2 * (1 - (x_loc_use - self.bottom_center_xyz[0])**2 / joint_raduis**2))**.5 + self.bottom_center_xyz[2]
+			z_loc = (joint_length_half**2 * (1 - (x_loc_use - 0)**2 / joint_raduis**2))**.5 + 0
 			print(f'x: {x_loc_use}, z: {z_loc}')
 			# y = ((dimensions[1]/2)**2 * (1 - ((rounded_x-self.bottom_center_xyz[0])**2)/(dimensions[0]/2)**2)) ** 0.5 + self.bottom_center_xyz[1]
 
-			front_verts.append(Vector((x_loc_use, self.bottom_center_xyz[1] - half_joint_width, z_loc)))
-			back_verts.append(Vector((x_loc_use, self.bottom_center_xyz[1] + half_joint_width, z_loc)))
+			front_verts.append(Vector((x_loc_use, -1* half_joint_width, z_loc)))
+			back_verts.append(Vector((x_loc_use, half_joint_width, z_loc)))
 
-		front_verts.append(Vector((self.bottom_center_xyz[0] + joint_raduis, self.bottom_center_xyz[1] - half_joint_width, self.bottom_center_xyz[2])))
-		back_verts.append(Vector((self.bottom_center_xyz[0] + joint_raduis, self.bottom_center_xyz[1] + half_joint_width, self.bottom_center_xyz[2])))
+		front_verts.append(Vector((joint_raduis, -1*half_joint_width, 0)))
+		back_verts.append(Vector((joint_raduis, half_joint_width, 0)))
 		self.verts += front_verts
 		start_stop_verts['front_verts'] = (0, len(self.verts)-1)
 		
@@ -257,9 +258,11 @@ class JointGenerator():
 
 		# print(f"\n\n\n {verts} \n\n\n")
 
+		translation = Matrix.Translation(Vector(self.bottom_center_xyz))
+
 		rotation = Matrix.Rotation(orientation * pi/180.0, 4, Vector((0.0,0.0,1.0)))
 		for i in range(len(self.verts)):
-			self.verts[i] = rotation @ self.verts[i]
+			self.verts[i] = translation @ rotation @ self.verts[i]
 
 
 		# return verts, faces
@@ -316,12 +319,83 @@ class JointGenerator():
 class FingerGenerator():
 	def __init__(self, finger_dict, run_trigger=False):
 		self.finger_dict = finger_dict
+		self.segments = []
+		for segment_number in range(self.finger_dict["segment_qty"]):
+			self.segments.append(FingerSegmentGenerator(self.finger_dict[f"segment_{segment_number}"]))
+
+	
+	def main(self):
+		pass
 
 
 class FingerSegmentGenerator():
-	def __init__(self, segment_dict, functions):
+	def __init__(self, segment_dict):
 		self.segment_dict = segment_dict
-		self.functions = functions
+		self.segment_joint = []
+		self.verts = []
+		self.faces = []
+		if len(self.segment_dict["segment_profile"]) == 2:
+			self.general_segment()
+		elif len(self.segment_dict["segment_profile"]) == 4:
+			self.distal_segment()
+	
+	def general_segment(self):
+		start_stop_verts = {}
+		width, depth, length = self.segment_dict["segment_dimensions"]
+		bottom_joint_length = self.segment_dict["segment_bottom_joint"]["joint_dimensions"][2]
+		self.top_length = length + bottom_joint_length
+		self.segment_joint.append(JointGenerator(self.segment_joint["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False))
+		self.segment_joint.append(JointGenerator(self.segment_joint["segment_top_joint"], [0.0,0.0, self.top_length], joint_bottom=True))
+		segment_profiles = self.segment_dict["segment_profile"]
+		bottom_bezier_verts = HF.bezier_curve([width/2, 0, 0],
+												[segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2]],
+												[-1*segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2]],
+												[-1*width/2, 0, 0])
+		self.verts += bottom_bezier_verts
+		start_stop_verts["bottom_bezier_verts"] = (0, len(self.verts)-1)
+
+		top_bezier_verts = HF.bezier_curve([width/2, 0, length],
+											[segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2] + length],
+											[-1*segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2] + length],
+											[-1*width/2, 0, length])
+		self.verts += top_bezier_verts
+		start_stop_verts["top_bezier_verts"] = (start_stop_verts["bottom_bezier_verts"][0]+1, len(self.verts)-1)
+		
+		
+		max_y_value = 0
+		for vert in self.verts:
+			if vert[1] > max_y_value:
+				max_y_value = vert[1]
+		remaining_depth = depth - max_y_value
+
+		self.verts.append(Vector((width/2, -1*remaining_depth, length)))
+		self.verts.append(Vector((-1*width/2, -1*remaining_depth, length)))
+		self.verts.append(Vector((-1*width/2, -1*remaining_depth, 0)))
+		self.verts.append(Vector((width/2, -1*remaining_depth, 0)))
+		bottom_face = [tuple(range(start_stop_verts['bottom_bezier_verts'][1], start_stop_verts['bottom_bezier_verts'][0]-1, -1)) + (len(self.verts) - 1, len(self.verts) - 2)]
+		top_face = [tuple(range(start_stop_verts['top_bezier_verts'][0], start_stop_verts['top_bezier_verts'][1]+1)) + (len(self.verts)-3, len(self.verts)-4)]
+		side_faces = [(start_stop_verts['bottom_bezier_verts'][0], start_stop_verts['top_bezier_verts'][0], len(self.verts)-4, len(self.verts)-1),
+						(start_stop_verts['bottom_bezier_verts'][1], len(self.verts)-2, len(self.verts)-3, start_stop_verts['top_bezier_verts'][1])]
+
+		front_faces = []
+		offset = start_stop_verts['bottom_bezier_verts'][1]
+		for i in range(start_stop_verts['bottom_bezier_verts'][1]):
+			front_faces.append((i, i+1, i+offset+1, i + offset))
+		
+		self.faces += bottom_face
+		self.faces += top_face
+		self.faces += side_faces
+		self.faces += front_faces
+
+		bezier_y_offset = depth/2 - max_y_value
+		translate = Matrix.Translation(Vector((0.0, bezier_y_offset, bottom_joint_length)))
+		for i in range(len(self.verts)):
+			self.verts[i] = translate @ self.verts[i]
+		
+
+
+	def distal_segment(self):
+		pass
 	
 class ObjectGenerator():
 	def __init__(self, object_dict, functions):
