@@ -43,22 +43,31 @@ class HandGenerator():
 		HF.blender_make_mesh(self.mesh_queue["palm"].verts, self.mesh_queue["palm"].faces, "palm_base")
 		names.append("palm_base")
 		for i, joint in enumerate(self.mesh_queue["palm"].joint_list):
-			print(i, joint.verts)
-			print('\n')
+			# print(i, joint.verts)
+			# print('\n')
 			HF.blender_make_mesh(joint.verts, joint.faces, f"palm_joint_{i}")
 			names.append(f"palm_joint_{i}")
 		HF.join_parts(names, "palm")
 		HF.export_part("palm", "./")
 		HF.delete_all()
 		
-		segment = self.mesh_queue["fingers"][0].segments[0]
+		# segment = self.mesh_queue["fingers"][0].segments[0]
 		
-		# for finger_number
-		HF.blender_make_mesh(segment.verts, segment.faces, "segment")
-		HF.blender_make_mesh(segment.segment_joint[0].verts, segment.segment_joint[0].faces, "bottom")
-		HF.blender_make_mesh(segment.segment_joint[1].verts, segment.segment_joint[1].faces, "top")
-		HF.join_parts(["bottom", "top", "segment"], "finger")
-		HF.export_part("finger", "./")
+		for finger_number, finger in enumerate(self.mesh_queue["fingers"]):
+			for segment_number, segment in enumerate(finger.segments):
+				print("\n\n\n it is doing segment creation \n\n\n")
+
+				print(len(segment.verts), len(segment.faces))		
+				HF.blender_make_mesh(segment.verts, segment.faces, f"finger_{finger_number}_segment{segment_number}")
+				HF.blender_make_mesh(segment.segment_joint[0].verts, segment.segment_joint[0].faces, f"finger_{finger_number}_segment{segment_number}_bottom")
+				if segment_number == len(finger.segments) - 1:
+					HF.join_parts([f"finger_{finger_number}_segment{segment_number}_bottom", f"finger_{finger_number}_segment{segment_number}"], f"finger_{finger_number}_segment{segment_number}_combined")
+				else:
+					HF.blender_make_mesh(segment.segment_joint[1].verts, segment.segment_joint[1].faces, f"finger_{finger_number}_segment{segment_number}_top")
+					HF.join_parts([f"finger_{finger_number}_segment{segment_number}_bottom", f"finger_{finger_number}_segment{segment_number}_top", f"finger_{finger_number}_segment{segment_number}"], f"finger_{finger_number}_segment{segment_number}_combined")
+				
+				HF.export_part(f"finger_{finger_number}_segment{segment_number}", "./")
+				HF.delete_all()
 
 
 class PalmGenerator():
@@ -258,7 +267,7 @@ class JointGenerator():
 		for loc in range(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1], 1):
 			top_faces.append((start_stop_verts['front_verts'][0] + loc, start_stop_verts['back_verts'][0] + loc, start_stop_verts['back_verts'][0]+loc + 1, start_stop_verts['front_verts'][0] + loc + 1))
 		
-		bottom_face = [(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1]+1, start_stop_verts['back_verts'][1]+1, start_stop_verts['back_verts'][0])]
+		bottom_face = [(start_stop_verts['front_verts'][0], start_stop_verts['front_verts'][1], start_stop_verts['back_verts'][1], start_stop_verts['back_verts'][0])]
 
 		self.faces += front_face
 		self.faces += back_face
@@ -409,7 +418,89 @@ class FingerSegmentGenerator():
 
 
 	def distal_segment(self):
-		pass
+		# print("\n\n\n it is doing a distal segment \n\n\n")
+		start_stop_verts = {}
+		width, depth, length = self.segment_dict["segment_dimensions"]
+		bottom_joint_length = self.segment_dict["segment_bottom_joint"]["joint_dimensions"][2]
+		self.top_length = length + bottom_joint_length
+		# self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
+		# self.segment_joint.append(JointGenerator(self.segment_dict["segment_top_joint"], [0.0,0.0, self.top_length], joint_bottom=True, run_trigger=True))
+		segment_profiles = self.segment_dict["segment_profile"]
+		bottom_bezier_verts = HF.bezier_curve([width/2, 0, 0],
+												[width/2 + segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2]],
+												[-1*width/2 + segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2]],
+												[-1*width/2, 0, 0])
+		self.verts += bottom_bezier_verts
+		start_stop_verts["bottom_bezier_verts"] = (0, len(self.verts)-1)
+
+		top_bezier_verts = HF.bezier_curve([width/2, 0, length],
+											[segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2] + length],
+											[-1*segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2] + length],
+											[-1*width/2, 0, length])
+		self.verts += top_bezier_verts
+		start_stop_verts["top_bezier_verts"] = (start_stop_verts["bottom_bezier_verts"][0]+1, len(self.verts)-1)
+		
+		
+		max_y_value = 0
+		for vert in self.verts:
+			if vert[1] > max_y_value:
+				max_y_value = vert[1]
+		remaining_depth = depth - max_y_value
+
+		top_bezier_point1 = self.segment_dict["segment_profile"][2]
+		top_bezier_point2 = self.segment_dict["segment_profile"][3]
+		top_verts = []
+		for vertex in top_bezier_verts:
+			top_verts.append(HF.bezier_curve(
+				[vertex[0], vertex[1], vertex[2]],
+				[vertex[0] + top_bezier_point1[0], vertex[1] + top_bezier_point1[1], vertex[2] + top_bezier_point1[2]],
+				[vertex[0] + top_bezier_point2[0], top_bezier_point2[1] - remaining_depth, vertex[2] + top_bezier_point2[2]],
+				[vertex[0], -remaining_depth, vertex[2]]
+			))
+
+		start_points = []
+		end_points = []
+		for vert_list in top_verts:
+			start_points.append(len(self.verts))
+			self.verts += vert_list
+			end_points.append(len(self.verts)-1)
+		
+		# self.verts.append(Vector((width/2, -1*remaining_depth, length)))
+		# self.verts.append(Vector((-1*width/2, -1*remaining_depth, length)))
+		self.verts.append(Vector((-1*width/2, -1*remaining_depth, 0)))
+		self.verts.append(Vector((width/2, -1*remaining_depth, 0)))
+		bottom_face = [tuple(range(start_stop_verts['bottom_bezier_verts'][1], start_stop_verts['bottom_bezier_verts'][0]-1, -1)) + (len(self.verts) - 1, len(self.verts) - 2)]
+		# top_face = [tuple(range(start_stop_verts['top_bezier_verts'][0], start_stop_verts['top_bezier_verts'][1]+1)) + (len(self.verts)-3, len(self.verts)-4)]
+		# side_faces = [(start_stop_verts['bottom_bezier_verts'][0], start_stop_verts['top_bezier_verts'][0], len(self.verts)-4, len(self.verts)-1),
+		# 				(start_stop_verts['bottom_bezier_verts'][1], len(self.verts)-2, len(self.verts)-3, start_stop_verts['top_bezier_verts'][1])]
+		back_face = [(len(self.verts)-2, len(self.verts)-1, end_points[0], end_points[-1])]
+		side_face1 = [tuple(range(start_points[0], end_points[0] +1)) + (len(self.verts)-1,0)]
+		side_face2 = [tuple(range(end_points[-1],start_points[-1] -1, -1)) + (len(bottom_bezier_verts)-1, len(self.verts)-2)]
+
+		top_faces = []
+		for i in range(len(top_verts)-1):
+			for j in range(len(top_verts[i])-1):
+				top_faces.append((j + start_points[i], j + start_points[i + 1], j + 1 + start_points[i + 1], j + 1 + start_points[i]))
+
+		front_faces = []
+		offset = start_stop_verts['bottom_bezier_verts'][1]
+		for i in range(start_stop_verts['bottom_bezier_verts'][1] + 1):
+			front_faces.append((i, i+1, i+offset+1, i + offset))
+		
+		self.faces += bottom_face
+		self.faces += top_faces
+		self.faces += side_face1
+		self.faces += side_face2
+		self.faces += front_faces
+		self.faces += back_face
+
+		bezier_y_offset = depth/2 - max_y_value
+		translate = Matrix.Translation(Vector((0.0, bezier_y_offset, bottom_joint_length)))
+		for i in range(len(self.verts)):
+			self.verts[i] = translate @ self.verts[i]
+		
+		# self.segment_dict["segment_top_joint"]["joint_dimensions"][1] = remaining_depth
+		self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
 	
 class ObjectGenerator():
 	def __init__(self, object_dict, functions):
