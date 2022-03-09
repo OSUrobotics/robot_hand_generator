@@ -19,12 +19,17 @@ class MainGenerator():
 		
 		HF.delete_all()
 
-		HandGenerator(hand_dict=self.project_dict['hand'])
+		HandGenerator(hand_dict=self.project_dict['hand'], directory_dict=self.directory_dict)
 
 
 class HandGenerator():
-	def __init__(self, hand_dict):
+	def __init__(self, hand_dict, directory_dict):
 		self.hand_dict = hand_dict
+		self.directory_dict = directory_dict
+		self.hand_directory = f'{self.directory_dict["hand_model_output"]}{self.hand_dict["hand_name"]}/hand/'
+		self.obj_files = f'{self.hand_directory}obj_files/'
+		HF.directory_maker(self.hand_directory)
+		HF.directory_maker(self.obj_files)
 		self.mesh_queue = {}
 		self.main()
 	
@@ -37,18 +42,21 @@ class HandGenerator():
 			finger_list.append(FingerGenerator(self.hand_dict[f'finger_{finger_number}'], run_trigger=True))
 		self.mesh_queue["fingers"] = finger_list
 		self.create_meshes()
+		self.generate_urdf()
 		
 	def create_meshes(self):
-		names = []
+
+		palm_names = []
 		HF.blender_make_mesh(self.mesh_queue["palm"].verts, self.mesh_queue["palm"].faces, "palm_base")
-		names.append("palm_base")
+		HF.export_part("palm_collision", self.obj_files)
+		palm_names.append("palm_base")
 		for i, joint in enumerate(self.mesh_queue["palm"].joint_list):
 			# print(i, joint.verts)
 			# print('\n')
 			HF.blender_make_mesh(joint.verts, joint.faces, f"palm_joint_{i}")
-			names.append(f"palm_joint_{i}")
-		HF.join_parts(names, "palm")
-		HF.export_part("palm", "./")
+			palm_names.append(f"palm_joint_{i}")
+		HF.join_parts(palm_names, "palm")
+		HF.export_part("palm", self.obj_files)
 		HF.delete_all()
 		
 		# segment = self.mesh_queue["fingers"][0].segments[0]
@@ -58,17 +66,39 @@ class HandGenerator():
 				print("\n\n\n it is doing segment creation \n\n\n")
 
 				print(len(segment.verts), len(segment.faces))		
-				HF.blender_make_mesh(segment.verts, segment.faces, f"finger_{finger_number}_segment{segment_number}")
-				HF.blender_make_mesh(segment.segment_joint[0].verts, segment.segment_joint[0].faces, f"finger_{finger_number}_segment{segment_number}_bottom")
+				HF.blender_make_mesh(segment.verts, segment.faces, f"finger{finger_number}_segment{segment_number}")
+				HF.export_part(f"finger{finger_number}_segment{segment_number}_collision", self.obj_files)
+				HF.blender_make_mesh(segment.segment_joint[0].verts, segment.segment_joint[0].faces, f"finger{finger_number}_segment{segment_number}_bottom")
 				if segment_number == len(finger.segments) - 1:
-					HF.join_parts([f"finger_{finger_number}_segment{segment_number}_bottom", f"finger_{finger_number}_segment{segment_number}"], f"finger_{finger_number}_segment{segment_number}_combined")
+					HF.join_parts([f"finger{finger_number}_segment{segment_number}_bottom", f"finger{finger_number}_segment{segment_number}"], f"finger{finger_number}_segment{segment_number}_combined")
 				else:
-					HF.blender_make_mesh(segment.segment_joint[1].verts, segment.segment_joint[1].faces, f"finger_{finger_number}_segment{segment_number}_top")
-					HF.join_parts([f"finger_{finger_number}_segment{segment_number}_bottom", f"finger_{finger_number}_segment{segment_number}_top", f"finger_{finger_number}_segment{segment_number}"], f"finger_{finger_number}_segment{segment_number}_combined")
+					HF.blender_make_mesh(segment.segment_joint[1].verts, segment.segment_joint[1].faces, f"finger{finger_number}_segment{segment_number}_top")
+					HF.join_parts([f"finger{finger_number}_segment{segment_number}_bottom", f"finger{finger_number}_segment{segment_number}_top", f"finger{finger_number}_segment{segment_number}"], f"finger_{finger_number}_segment{segment_number}_combined")
 				
-				HF.export_part(f"finger_{finger_number}_segment{segment_number}", "./")
+				HF.export_part(f"finger{finger_number}_segment{segment_number}", self.obj_files)
 				HF.delete_all()
 
+	def generate_urdf(self):
+		self.urdf = UrdfGenerator(f'{self.hand_directory}')
+
+		self.urdf.start_file(self.hand_dict["hand_name"])
+
+		self.urdf.link(name = "palm", pose=(0,0,0,0,0,0), model_name="palm")
+
+		for finger_number in range(self.hand_dict["palm"]["finger_qty"]):
+			finger = self.hand_dict[f"finger_{finger_number}"]
+			initial_pose = finger["finger_pose"]
+			segment0 = finger["segment_0"]
+			previous_height = self.mesh_queue["fingers"][finger_number].segments[0].top_length
+			self.urdf.link(f"finger{finger_number}_segment0")
+			self.urdf.joint(f"finger{finger_number}_segment0_joint", "revolute", f"finger{finger_number}_segment0", "palm", (1,0,0), (0,0,(finger["finger_pose"][2]+180) * pi /180), (finger["finger_pose"][0] * sin(finger["finger_pose"][1]*pi/180), finger["finger_pose"][0] * cos(finger["finger_pose"][1]*pi/180), 0))
+			for segment_number in range(1, finger[f"segment_qty"]):
+				self.urdf.link(f"finger{finger_number}_segment{segment_number}")
+				self.urdf.joint(f"finger{finger_number}_segment{segment_number}_joint", "revolute", f"finger{finger_number}_segment{segment_number}", f"finger{finger_number}_segment{segment_number-1}", (1,0,0), xyz_in=(0,0,previous_height))
+				previous_height = self.mesh_queue["fingers"][finger_number].segments[segment_number].top_length
+			
+		self.urdf.end_file()
+		self.urdf.write(filename=self.hand_dict["hand_name"])
 
 class PalmGenerator():
 	def __init__(self, palm_dict, run_trigger=False):
@@ -228,8 +258,6 @@ class JointGenerator():
 		width, depth, length = self.joint_dict["joint_dimensions"]
 		
 		start_stop_verts = {}
-		# verts = []
-		# faces = []
 
 		self.bottom_center_xyz = self.bottom_center_xyz
 

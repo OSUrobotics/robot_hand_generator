@@ -9,13 +9,13 @@ import json
 class sim_tester():
 
     def __init__(self, gripper_name, object_type, object_size, file_locations):
-        self.gripper_name = gripper_name
-        self.object_type = object_type
-        self.object_size = object_size
-        self.file_loc = file_locations
+        # self.gripper_name = gripper_name
+        # self.object_type = object_type
+        # self.object_size = object_size
+        # self.file_loc = file_locations
 
-        self.hand_models = self.file_loc["hand_models"]
-        self.object_models = self.file_loc["object_models"]
+        # self.hand_models = self.file_loc["hand_models"]
+        # self.object_models = self.file_loc["object_models"]
 
         self.directory = os.path.dirname(__file__)
 
@@ -36,12 +36,12 @@ class sim_tester():
         # boxId = p.loadURDF(f"{directory}/hand_models/3v2_test_hand/3v2_test_hand.urdf", useFixedBase=1)
         # boxId = p.loadURDF(f"{directory}/hand_models/testing/testing.urdf", useFixedBase=1)
 
-        boxId = p.loadURDF(f"{self.hand_models}{self.gripper_name}/{self.gripper_name}.urdf", useFixedBase=1)
-
+        # boxId = p.loadURDF(f"{self.hand_models}{self.gripper_name}/{self.gripper_name}.urdf", useFixedBase=1)
+        boxId = p.loadURDF("/root/robot_manipulator_generator/output/test_hand/hand/test_hand.urdf", useFixedBase=1)
 
         gripper = boxId
 
-        obj = p.loadURDF(f"{self.object_models}{self.gripper_name}/{self.gripper_name}_{self.object_type}_{self.object_size}.urdf", useFixedBase=1, basePosition=[0, 0.15, 0])
+        # obj = p.loadURDF(f"{self.object_models}{self.gripper_name}/{self.gripper_name}_{self.object_type}_{self.object_size}.urdf", useFixedBase=1, basePosition=[0, 0.15, 0])
 
         p.resetDebugVisualizerCamera(cameraDistance=.2, cameraYaw=180, cameraPitch=-91, cameraTargetPosition=[0, 0.1, 0.1])
         # p.resetDebugVisualizerCamera(cameraDistance=.2, cameraYaw=90, cameraPitch=0, cameraTargetPosition=[.1, 0, .1])
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     directory = os.getcwd()
 
-    file_content = read_json(f"{directory}/User_Info.json")
+    file_content = read_json("/root/robot_manipulator_generator/src/.user_info.json")
 
 
     gripper_name = input("Name of the gipper (ex. 3v2_test_hand):  ")
@@ -95,6 +95,6 @@ if __name__ == '__main__':
     else:
         object_type = input("Object type(currently just cuboid):  ")
         object_size = input("Object size (small medium or large):  ")
-
+    gripper_name = "test_hand"
     sim_test = sim_tester(gripper_name, object_type, object_size, file_content)
     sim_test.main()

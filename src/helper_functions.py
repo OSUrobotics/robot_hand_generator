@@ -92,7 +92,7 @@ def export_part(name, export_directory):
     """
     name += '.obj'
     target_file = os.path.join(export_directory, name)
-    bpy.ops.export_scene.obj(filepath=target_file, use_triangles=True, path_mode='COPY')
+    bpy.ops.export_scene.obj(filepath=target_file, use_triangles=True, path_mode='COPY', axis_forward="Y", axis_up='Z')
 
 def import_part(file_name, file_location, position=None, rotation=None):
     
