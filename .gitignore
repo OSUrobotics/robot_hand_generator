@@ -127,3 +127,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# Custom
+.blender_python.txt
+# hand_json_files/hand_*/
+hand_json_files/hand_archive_json/
+hand_json_files/hand_queue_json/
+
+.vscode/
+
+src/.user_info.json
