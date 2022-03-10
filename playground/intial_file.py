@@ -1,5 +1,4 @@
-from asyncio.constants import SENDFILE_FALLBACK_READBUFFER_SIZE
-from tracemalloc import start
+
 from bpy import data, context
 import bpy
 import mathutils
