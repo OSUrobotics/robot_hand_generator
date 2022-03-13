@@ -1,5 +1,4 @@
 numpy
-json
 glob
 subprocess
 pathlib
