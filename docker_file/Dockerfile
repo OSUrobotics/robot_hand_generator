@@ -24,4 +24,4 @@ RUN /bin/bash -c 'mkdir ~/software; \
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install pathlib;\
     '
     
-CMD ["python3" "/root/robot_manipulator_generator/first_dun.py 0 /root/software/blender-2.93/blender"]
+# CMD ["python3" "/root/robot_manipulator_generator/first_dun.py 0 /root/software/blender-2.93/blender"]
