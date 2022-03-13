@@ -22,7 +22,7 @@ RUN /bin/bash -c 'mkdir ~/software; \
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install upgrade pip;\
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install numpy;\
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install pathlib;\
-    cd /root/robot_manipulator_generator/; python3 first_run.py 0 /root/software/blender-29.3/blender";\
+    cd /root/robot_manipulator_generator/; python3 first_run.py 0 /root/software/blender-29.3/blender;\
     '
     
 # CMD ["python3" "/root/robot_manipulator_generator/first_dun.py 0 /root/software/blender-2.93/blender"]
