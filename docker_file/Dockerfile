@@ -21,7 +21,6 @@ RUN /bin/bash -c 'mkdir ~/software; \
     '
 RUN /bin/bash -c'/root/software/blender-2.93/2.93/python/bin/python3.9 -m ensurepip;\
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install numpy;\
-    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install json;\
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install pathlib;\
     cd /root/robot_manipulator_generator/; python3 first_run.py 0 /root/software/blender-2.93/blender;\
     '
