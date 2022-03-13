@@ -1,5 +1,1 @@
 numpy
-glob
-subprocess
-pathlib
-shutil
