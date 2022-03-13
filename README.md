@@ -14,7 +14,7 @@ A tool to help in the creation of simplified robot manipulators to be used in si
 - Python 3.6+
 
 
-## Install and Setup:
+## Install and Setup(Docker on Linux host machine):
 Docker with linux is the only supported manner wslg should be doable but requires you to download the repo to build the Dockerfile, as well as setup slightly differently.(Instructions will come later)
 
 0. Here is some basic information to get going with docker: https://github.com/OSUrobotics/infrastructure-packages/blob/new_file_structure/docker_setup.md
@@ -84,3 +84,9 @@ Assuming that you have started and are in the docker container.
 
 ## Testing:
 TODO
+
+
+## Todo:
+
+- Create instruction specific for wslg
+- Create instructions for non-docker install
