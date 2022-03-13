@@ -12,7 +12,7 @@ import shutil
 class Setup():
     def __init__(self, input_val, blender_loc= ' '):
         self.current_directory = os.getcwd()
-        print(self.current_directory)
+        
         self.blender_loc = blender_loc
         if input_val == 0: # occures if it is being setup as a docker container using stand alone file structure
             self.stand_alone_file_structure()
@@ -76,8 +76,7 @@ if __name__ == '__main__':
         input_value = 1
     else:
         input_value = int(input_val[0])
-
-    # print(input_value, blender_loc)
+        
     Setup(input_val=input_value, blender_loc=blender_loc)
 
     
