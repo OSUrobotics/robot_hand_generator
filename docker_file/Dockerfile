@@ -18,11 +18,10 @@ RUN /bin/bash -c 'mkdir ~/software; \
     cd ~/robot_manipulator_generator/; pip3 install -r requirements.txt;\
     pip3 install pybullet;\
     cd ~/software/; git clone https://github.com/bulletphysics/bullet3.git; cd ./bullet3/; python3 setup.py build; python3 setup.py install;\
-    ';
-RUN /bin/bash -c'/root/software/blender-2.93/2.93/python/bin/python3.9 -m ensurepip;\
+    /root/software/blender-2.93/2.93/python/bin/python3.9 -m ensurepip;\
+    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install upgrade pip;\
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install numpy;\
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip install pathlib;\
-    ';
-
-
+    '
+    
 CMD ["python3" "/root/robot_manipulator_generator/first_dun.py 0 /root/software/blender-2.93/blender"]
