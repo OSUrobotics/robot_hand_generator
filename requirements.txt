@@ -1,1 +1,6 @@
 numpy
+json
+glob
+subprocess
+pathlib
+shutil
