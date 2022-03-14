@@ -49,7 +49,7 @@ class Setup():
         with open(f'{self.current_directory}/src/.user_info.json','w') as write_file:
             json.dump(directory_dict, write_file, indent=4)
         
-        # self.setup_examples(dict = directory_dict)
+        self.setup_examples(dict = directory_dict)
 
     def setup_examples(self, dict):
         example_loc = dict['hand_examples']
@@ -78,6 +78,6 @@ if __name__ == '__main__':
         input_value = int(input_val[0])
 
     # print(input_value, blender_loc)
-    Setup(input_val=input_value)
+    Setup(input_val=input_value, blender_loc=blender_loc)
 
     

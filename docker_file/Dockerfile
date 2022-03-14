@@ -19,8 +19,8 @@ RUN /bin/bash -c 'mkdir ~/software; \
     pip3 install pybullet;\
     cd ~/software/; git clone https://github.com/bulletphysics/bullet3.git; cd ./bullet3/; python3 setup.py build; python3 setup.py install;\
     /root/software/blender-2.93/2.93/python/bin/python3.9 -m ensurepip;\
-    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip3 isntall numpy;\
-    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip3 isntall json;\
-    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip3 isntall pathlib;\
+    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip isntall numpy;\
+    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip isntall json;\
+    /root/software/blender-2.93/2.93/python/bin/python3.9 -m pip isntall pathlib;\
     cd /root/robot_manipulator_generator/; python3 first_run.py 0 /root/software/blender-2.93/blender;\
     '
