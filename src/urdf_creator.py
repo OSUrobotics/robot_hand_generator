@@ -1,3 +1,9 @@
+"""Contains the helper class for generating custom urdf files.
+
+Author: Josh Campbell, campbjos@oregonstate.edu
+Date: 3-14-2022
+"""
+
 import os
 
 class UrdfGenerator():

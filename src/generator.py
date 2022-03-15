@@ -1,3 +1,8 @@
+"""Script ran with blender's provided python to generate custom robot manipulators to be used in simulators.
+
+Author: Josh Campbell, campbjos@oregonstate.edu
+Date: 3-14-2022
+"""
 #!~/software/blender-2.93/2.93/python/bin/python3.9
 
 from bpy import data, context
@@ -10,6 +15,7 @@ import os
 import sys
 import json
 from math import sin, cos, tan, pi
+
 
 
 class MainGenerator():
@@ -139,9 +145,7 @@ class PalmGenerator():
 			self.cylinder_palm()
 		elif self.palm_dict["palm_style"] == "cuboid":
 			self.cuboid_palm()
-		# HF.blender_make_mesh(verts=verts, faces=faces, mesh_name="palm")
 		
-		# joint_list = []
 		for joint_number in range(self.palm_dict["finger_qty"]):
 			distance, angle, _ = self.palm_dict["palm_joints"][f'finger_{joint_number}']["joint_pose"]
 			bottom_center_xyz = [distance * sin(angle*pi/180),distance * cos(angle*pi/180), 0]
@@ -152,7 +156,6 @@ class PalmGenerator():
 		"""Generate a cuboid style palm."""
 		dimensions = self.palm_dict["palm_dimensions"]
 		start_stop_verts_dict = {}
-		# verts = []
 
 		top_verts = [
 			Vector((-1*dimensions[0]/2,  dimensions[1]/2,    0)), 
@@ -205,15 +208,19 @@ class PalmGenerator():
 		step_size = 0.001
 		for x in np.arange(-1.0* dimensions[0]/2.0, dimensions[0]/2.0 + step_size, step_size):
 			rounded_x = round(x,3)
+			
 
 			y = ((dimensions[1]/2)**2 * (1 - ((rounded_x-self.bottom_center_xyz[0])**2)/(dimensions[0]/2)**2)) ** 0.5 + self.bottom_center_xyz[1]
 			negative_y = -1 * y
-			top_negative_verts.append(Vector((rounded_x, negative_y, self.bottom_center_xyz[2])))
-			bottom_negative_verts.append(Vector((rounded_x, negative_y, self.bottom_center_xyz[2] - dimensions[2])))
+
+			temp_top = (rounded_x, round(negative_y, 5), round(self.bottom_center_xyz[2], 5))
+			temp_bottom = (rounded_x, round(negative_y, 5), round(self.bottom_center_xyz[2] - dimensions[2], 5))
+			top_negative_verts.append(Vector(temp_top))
+			bottom_negative_verts.append(Vector(temp_bottom))
 			
 			if -1 * dimensions[0]/2 < rounded_x < dimensions[0]/2: 
-				top_positive_verts.insert(0, Vector((rounded_x, y, self.bottom_center_xyz[2])))
-				bottom_positive_verts.insert(0, Vector((rounded_x, y, self.bottom_center_xyz[2] - dimensions[2])))
+				top_positive_verts.insert(0, Vector((rounded_x, round(y, 5), self.bottom_center_xyz[2])))
+				bottom_positive_verts.insert(0, Vector((rounded_x, round(y, 5), round(self.bottom_center_xyz[2] - dimensions[2], 5))))
 		
 		self.verts += top_negative_verts
 		self.verts += top_positive_verts
@@ -305,7 +312,7 @@ class JointGenerator():
 		back_verts.append(Vector((half_joint_width, -1*joint_raduis, 0)))
 
 		for y_loc in np.arange(-1*joint_raduis + 0.001, joint_raduis - 0.001, 0.001):
-			y_loc_use = np.round(y_loc,3)
+			y_loc_use = round(y_loc,3)
 			
 			# z_loc = (joint_raduis**2 - x_loc**2) ** 0.5 + self.bottom_center_xyz[2]
 			z_loc = (joint_length_half**2 * (1 - (y_loc_use - 0)**2 / joint_raduis**2))**.5 + 0
@@ -416,23 +423,28 @@ class FingerGenerator():
 class FingerSegmentGenerator():
 	"""Generate the finger segment."""
 
-	def __init__(self, segment_dict):
+	def __init__(self, segment_dict, run_trigger=True):
 		"""Initialize the FingerSegmentGenerator class.
 
 		Args:
 			segment_dict (Dictionary): A dictionary that describes the segment that is going to be generated
+			run_trigger (bool, optional) : Trigger for auto run or manual run. Defaults to True
 		"""
 		self.segment_dict = segment_dict
 		self.segment_joint = []
 		self.verts = []
 		self.faces = []
-		if len(self.segment_dict["segment_profile"]) == 2:
+		if len(self.segment_dict["segment_profile"]) == 2 and run_trigger==True:
 			self.general_segment()
-		elif len(self.segment_dict["segment_profile"]) == 4:
+		elif len(self.segment_dict["segment_profile"]) == 4 and run_trigger==True:
 			self.distal_segment()
 	
-	def general_segment(self):
-		"""Generate the generaric segment mostly the proximal and intermediate segments."""
+	def general_segment(self, generate_joints=True):
+		"""Generate the generaric segment mostly the proximal and intermediate segments.
+
+		Args:
+			generate_joints (bool, optional): Determines if the joints are generated, for testing. Defaults to True.
+		"""
 		start_stop_verts = {}
 		width, depth, length = self.segment_dict["segment_dimensions"]
 		bottom_joint_length = self.segment_dict["segment_bottom_joint"]["joint_dimensions"][2]
@@ -483,14 +495,19 @@ class FingerSegmentGenerator():
 		for i in range(len(self.verts)):
 			self.verts[i] = translate @ self.verts[i]
 		
-		# Calls the joint generator to create the top and bottom portions of the joint
-		self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
-		self.segment_joint.append(JointGenerator(self.segment_dict["segment_top_joint"], [0.0,0.0, self.top_length], joint_bottom=True, run_trigger=True))
+		if generate_joints == True:
+			# Calls the joint generator to create the top and bottom portions of the joint
+			self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
+			self.segment_joint.append(JointGenerator(self.segment_dict["segment_top_joint"], [0.0,0.0, self.top_length], joint_bottom=True, run_trigger=True))
 		
 
 
-	def distal_segment(self):
-		"""Generate the distal segment. This one uses two bezier curves, one describes the segment face profile the other describes the segment top profile."""
+	def distal_segment(self, generate_joints=True):
+		"""Generate the distal segment. This one uses two bezier curves, one describes the segment face profile the other describes the segment top profile.
+
+		Args:
+			generate_joints (bool, optional): Determines if the joints are generated as well, for testing. Defaults to True.
+		"""
 		start_stop_verts = {}
 		width, depth, length = self.segment_dict["segment_dimensions"]
 		bottom_joint_length = self.segment_dict["segment_bottom_joint"]["joint_dimensions"][2]
@@ -565,8 +582,9 @@ class FingerSegmentGenerator():
 		for i in range(len(self.verts)):
 			self.verts[i] = translate @ self.verts[i]
 		
-		# Calls the joint generator to create the joint on the bottom of the segment
-		self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
+		if generate_joints == True:	
+			# Calls the joint generator to create the joint on the bottom of the segment
+			self.segment_joint.append(JointGenerator(self.segment_dict["segment_bottom_joint"], [0.0,0.0,0.0], joint_bottom=False, run_trigger=True))
 	
 class ObjectGenerator():
 	"""Generate the objects."""
@@ -592,16 +610,18 @@ def read_json(json_loc):
 		dictionary = json.load(read_file)
 	return dictionary
 
+try:
+	directory_dict = read_json('../src/.user_info.json') # relative path to json file that contains absolute paths to different directories.
 
-if __name__ == '__main__':
-
-	directory_dict = read_json('./.user_info.json') # relative path to json file that contains absolute paths to different directories.
-	
 	sys.path.append(bpy.path.abspath("//")+directory_dict['src']) # this lets me import the other scripts that I made
 
 	# helper functions for blender generation and creating a urdf
 	import helper_functions as HF 
 	from urdf_creator import UrdfGenerator
+except FileNotFoundError: 
+	pass
+
+if __name__ == '__main__':
 	
 	# this script is called using subprocess in the main.py and during the call the file name is passed in as an argument
 	json_file_name = sys.argv[-1]

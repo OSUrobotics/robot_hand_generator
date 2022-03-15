@@ -1,3 +1,9 @@
+"""Script containing custom functions to simplify blenders API.
+
+Author: Josh Campbell, campbjos@oregonstate.edu
+Date: 3-14-2022
+"""
+
 import bpy
 import os
 from bpy import data, context
@@ -57,11 +63,11 @@ def bezier_curve(p0, p1, p2, p3, resolution=0.01):
 	"""
 	points = []
 	for t in np.arange(0.0, 1 + resolution, resolution):
-		use_t = np.round(t,3)
+		use_t = np.round(t,5)
 		points.append(Vector([
-		(((1 - use_t) ** 3) * p0[0]) + (3*((1-use_t)**2) * use_t * p1[0]) + (3*(1-use_t) * (use_t ** 2) *p2[0]) + (use_t**3 * p3[0]),
-		(((1 - use_t) ** 3) * p0[1]) + (3*((1-use_t)**2) * use_t * p1[1]) + (3*(1-use_t) * (use_t ** 2) *p2[1]) + (use_t**3 * p3[1]),
-		(((1 - use_t) ** 3) * p0[2]) + (3*((1-use_t)**2) * use_t * p1[2]) + (3*(1-use_t) * (use_t ** 2) *p2[2]) + (use_t**3 * p3[2])]))
+		round((((1 - use_t) ** 3) * p0[0]) + (3*((1-use_t)**2) * use_t * p1[0]) + (3*(1-use_t) * (use_t ** 2) *p2[0]) + (use_t**3 * p3[0]),5),
+		round((((1 - use_t) ** 3) * p0[1]) + (3*((1-use_t)**2) * use_t * p1[1]) + (3*(1-use_t) * (use_t ** 2) *p2[1]) + (use_t**3 * p3[1]),5),
+		round((((1 - use_t) ** 3) * p0[2]) + (3*((1-use_t)**2) * use_t * p1[2]) + (3*(1-use_t) * (use_t ** 2) *p2[2]) + (use_t**3 * p3[2]),5)]))
 	return points
 
 
