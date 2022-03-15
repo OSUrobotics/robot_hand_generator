@@ -2,9 +2,6 @@ Module helper_functions
 =======================
 Script containing custom functions to simplify blenders API.
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-
 Functions
 ---------
 

@@ -1,8 +1,8 @@
-"""Script for testing the generated robot manipulators in a simply pybullet enviroment.
+"""Script for testing the generated robot manipulators in a simply pybullet enviroment."""
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-"""
+# Author: Josh Campbell, campbjos@oregonstate.edu
+# Date: 3-14-2022
+
 #!/usr/bin/python3
 
 import pybullet as p

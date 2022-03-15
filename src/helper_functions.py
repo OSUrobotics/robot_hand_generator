@@ -1,8 +1,7 @@
-"""Script containing custom functions to simplify blenders API.
+"""Script containing custom functions to simplify blenders API."""
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-"""
+# Author: Josh Campbell, campbjos@oregonstate.edu
+# Date: 3-14-2022
 
 import bpy
 from bpy import data, context

@@ -1,8 +1,7 @@
-"""Main script to be ran by user, this will grab jsons from the queue and run an instance of generator.py passing the json in.
+"""Main script to be ran by user, this will grab jsons from the queue and run an instance of generator.py passing the json in."""
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-"""
+# Author: Josh Campbell, campbjos@oregonstate.edu
+# Date: 3-14-2022
 
 #!/usr/bin/python3
 import glob

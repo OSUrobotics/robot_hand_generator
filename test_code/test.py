@@ -1,8 +1,7 @@
-"""Test script that ensures the generator methods can reproduce models that have been checked by other means.
+"""Test script that ensures the generator methods can reproduce models that have been checked by other means."""
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-"""
+# Author: Josh Campbell, campbjos@oregonstate.edu
+# Date: 3-14-2022
 
 #!~/software/blender-2.93/2.93/python/bin/python3.9
 

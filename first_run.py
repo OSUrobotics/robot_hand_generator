@@ -1,10 +1,7 @@
-"""Script for setting up the file structure and placing the examples.
+"""Script for setting up the file structure and placing the examples."""
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-"""
-
-
+# Author: Josh Campbell, campbjos@oregonstate.edu
+# Date: 3-14-2022
 
 #!/usr/bin/python3
 

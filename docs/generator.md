@@ -2,9 +2,6 @@ Module generator
 ================
 Script ran with blender's provided python to generate custom robot manipulators to be used in simulators.
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-
 Functions
 ---------
 

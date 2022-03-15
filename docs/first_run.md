@@ -2,9 +2,6 @@ Module first_run
 ================
 Script for setting up the file structure and placing the examples.
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-
 Classes
 -------
 

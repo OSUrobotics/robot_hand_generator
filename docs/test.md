@@ -2,9 +2,6 @@ Module test
 ===========
 Test script that ensures the generator methods can reproduce models that have been checked by other means.
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-
 Functions
 ---------
 

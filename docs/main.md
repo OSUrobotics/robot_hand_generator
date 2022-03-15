@@ -2,9 +2,6 @@ Module main
 ===========
 Main script to be ran by user, this will grab jsons from the queue and run an instance of generator.py passing the json in.
 
-Author: Josh Campbell, campbjos@oregonstate.edu
-Date: 3-14-2022
-
 Classes
 -------
 
