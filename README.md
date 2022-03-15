@@ -47,7 +47,8 @@ Docker with linux is the only supported manner wslg should be doable but require
 
 
 ## How to Use:
-Assuming that you have started and are in the docker container.
+Documentation on the different scripts is provided in the /docs directory.
+Assuming that you have started and are in the docker container the follow is the typical actions you'll want to do:
 
 1. Navigate to the src directory in robot_manipulator_generator:
     ```console
@@ -55,6 +56,7 @@ Assuming that you have started and are in the docker container.
     ```
 
 2. Run main.py, which will generate a hand for all json files in the hand_json_queue directory:
+    * On a fresh docker container there will be an example hand's json in the queue ready to go.
     ```console
     python3 main.py
     ```
@@ -64,13 +66,14 @@ Assuming that you have started and are in the docker container.
     ```
 
 3. To visualize the hands generated navigate the pybullet_playground and run the simulator:
+    * Assuming that you have gui support setup for the docker container.
     ```console
     cd ~/robot_manipulator_generator/pybullet_playground
     ```
     ```console
     python3 simulator_playground.py
     ```
-    The simulator will list the available manipulators enter the one you want to view.
+    The simulator will list the available manipulators enter the number associated with the one you want to view.
 
 4. If you want to create your own custom hand navigate to the hand_json_queue directory and add a new json in this directory(A tool to help json creation is in developement).
     ```console
@@ -80,6 +83,7 @@ Assuming that you have started and are in the docker container.
     ```console
     ~/robot_manipulator_generator/hand_json_files/example_hand_json/test_hand.json
     ```
+    An additional script that will simplify the json creation is in the works.
 
 
 ## Testing:
