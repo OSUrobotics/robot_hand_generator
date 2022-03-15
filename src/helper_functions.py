@@ -5,12 +5,12 @@ Date: 3-14-2022
 """
 
 import bpy
-import os
 from bpy import data, context
 import bpy
 import mathutils
 from mathutils import Vector
 import bmesh
+import os
 import json
 import numpy as np
 from pathlib import Path

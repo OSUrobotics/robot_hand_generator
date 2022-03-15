@@ -10,7 +10,10 @@ import sys, json
 import bpy
 
 class TestGenerator():
+	"""Class for testing the generator.py mesh creation."""
+
 	def __init__(self):
+		"""Initialize the TestGeneratory Class."""
 		self.test_results_location = "./test_results.json"
 		self.test_key_dict = read_json(self.test_results_location)
 		self.test_results_dict = {}
@@ -18,6 +21,11 @@ class TestGenerator():
 		self.name_list = ["palm_cuboid_test", "palm_cylinder_test", "joint_pin_bottom", "joint_pin_top", "segment_general", "segment_distal"]
 	
 	def main(self, udate_json=False):
+		"""Call the test methods.
+
+		Args:
+			udate_json (bool, optional): Trigger to save a new json key or not. Defaults to False.
+		"""
 		self.palm_cuboid_test()
 		self.palm_cylinder_test()
 		self.joint_pin_bottom()
@@ -31,6 +39,7 @@ class TestGenerator():
 
 
 	def palm_cuboid_test(self): # 0
+		"""Test generation of the cuboid palm."""
 		palm_dict = {
 				"palm_style" : "cuboid",
 				"palm_dimensions" : [0.50,2.0,0.5]
@@ -47,6 +56,7 @@ class TestGenerator():
 
 	
 	def palm_cylinder_test(self): # 1
+		"""Test generation of the cylinder palm."""
 		palm_dict = {
 				"palm_style" : "cylinder",
 				"palm_dimensions" : [0.50,2.0,0.5]
@@ -63,6 +73,7 @@ class TestGenerator():
 
 
 	def joint_pin_bottom(self): # 2
+		"""Test pin joint bottom."""
 		joint_dict = {
                     "joint_style" : "pin",
                     "joint_dimensions" : [0.1 , 0.1, 0.1],
@@ -80,6 +91,7 @@ class TestGenerator():
 		self.test_results_dict[self.name_list[2]] = {"verts": joint_pin_bottom_vert, "faces": joint_pin_bottom_faces}
 		
 	def joint_pin_top(self): # 3
+		"""Test pin joint top."""
 		joint_dict = {
                     "joint_style" : "pin",
                     "joint_dimensions" : [0.1 , 0.1, 0.1],
@@ -97,6 +109,7 @@ class TestGenerator():
 		self.test_results_dict[self.name_list[3]] = {"verts": joint_pin_top_verts, "faces": joint_pin_top_faces}
 
 	def segment_general(self): # 4
+		"""Test general segment generation."""
 		segment_dict = {
                 "segment_profile" : [[0.0,0.05,0],[0,0.05,0]],
                 "segment_dimensions" : [0.1 , 0.1, 0.5],
@@ -124,6 +137,7 @@ class TestGenerator():
 		self.test_results_dict[self.name_list[4]] = {"verts": segment_general_verts, "faces": segment_general_faces}
 
 	def segment_distal(self): # 5
+		"""Test distal segment generation."""
 		segment_distal_dict = {
                 "segment_profile" : [[0,0.05,0],[0,0.05,0], [0.00,0.0,0.05], [0.00,0.0,0.05]],
                 "segment_dimensions" : [0.1 , 0.1, 0.5],
@@ -144,6 +158,7 @@ class TestGenerator():
 		self.test_results_dict[self.name_list[5]] = {"verts": segment_distal_verts, "faces": segment_distal_faces}
 
 	def check_output(self):
+		"""Check if the new values match the old values."""
 		print('\n')
 		for name in self.name_list:
 			if self.test_results_dict[name]["verts"] == self.test_key_dict[name]["verts"]:
@@ -160,6 +175,12 @@ class TestGenerator():
 
 
 def write_json(json_loc, json_data):
+	"""Write contant into the json file.
+
+	Args:
+		json_loc (str): file location of the json file to write
+		json_data (dictionary): dictionary containing test results.
+	"""
 	with open(json_loc,'w') as write_file:
 		json.dump(json_data, write_file, indent=4)
 
@@ -182,9 +203,6 @@ if __name__ == '__main__':
 	
 	sys.path.append(bpy.path.abspath("//")+directory_dict['src']) # this lets me import the other scripts that I made
 
-	# helper functions for blender generation and creating a urdf
-	# import helper_functions as HF 
-	# from urdf_creator import UrdfGenerator
 	import generator
 
 	test = TestGenerator()

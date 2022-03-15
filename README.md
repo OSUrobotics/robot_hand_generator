@@ -83,7 +83,15 @@ Assuming that you have started and are in the docker container.
 
 
 ## Testing:
-TODO
+
+1. Navigate to test_code.
+    ```console
+    cd ~/robot_manipulator_generator/test_code/
+    ```
+2. Run the test code.
+    ```console
+    blender -b --python test.py
+    ```
 
 
 ## Todo:
