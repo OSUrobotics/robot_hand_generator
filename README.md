@@ -1,5 +1,5 @@
-# robot_manipulator_generator
-A tool to help in the creation of simplified robot manipulators to be used in simulation. Primarily for use with mojo grasp.
+# robot_hand_generator
+A tool to help in the creation of simplified robot hands to be used in simulation. Primarily for use with mojo grasp.
 
 
 ## Requirements:
@@ -23,7 +23,7 @@ Docker with linux is the only supported manner wslg should be doable but require
     (If you added user to docker group you don't need sudo infront of the docker commands)
 
     ```console
-    sudo docker build -t robot_hand_generator https://github.com/JCampbell9/robot_manipulator_generator.git#main:docker_file
+    sudo docker build -t robot_hand_generator https://github.com/SoftwareDevEngResearch/robot_hand_generator.git#main:docker_file
     ```
     ```console
     DOCKER_COMMON_ARGS="--gpus all --env=NVIDIA_VISIBLE_DEVICES=all --env=NVIDIA_DRIVER_CAPABILITIES=all --env=DISPLAY --env=QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
@@ -53,7 +53,7 @@ Docker with linux is the only supported manner wslg should be doable but require
 
 4. Navigate to the root directory of the repo and do a git pull to ensure the files are up to date:
     ```console
-    cd ~/robot_manipulator_generator/
+    cd ~/robot_hand_generator/
     ```
     ```console
     git pull
@@ -66,7 +66,7 @@ Assuming that you have started and are in the docker container the follow is the
 
 1. Navigate to the src directory in robot_manipulator_generator:
     ```console
-    cd ~/robot_manipulator_generator/src/
+    cd ~/robot_hand_generator/src/
     ```
 
 2. Run main.py, which will generate a hand for all json files in the hand_json_queue directory:
@@ -76,13 +76,13 @@ Assuming that you have started and are in the docker container the follow is the
     ```
     The output files will be located in folder named after the hand name located in here:
     ```console
-    cd ~/robot_manipulator_generator/output/
+    cd ~/robot_hand_generator/output/
     ```
 
 3. To visualize the hands generated navigate the pybullet_playground and run the simulator:
     * Assuming that you have gui support setup for the docker container.
     ```console
-    cd ~/robot_manipulator_generator/pybullet_playground
+    cd ~/robot_hand_generator/pybullet_playground
     ```
     ```console
     python3 simulator_playground.py
@@ -91,11 +91,11 @@ Assuming that you have started and are in the docker container the follow is the
 
 4. If you want to create your own custom hand navigate to the hand_json_queue directory and add a new json in this directory(A tool to help json creation is in developement).
     ```console
-    cd ~/robot_manipulator_generator/hand_json_files/hand_queue_json/
+    cd ~/robot_hand_generator/hand_json_files/hand_queue_json/
     ```
     The example hand_json can be used as a reference and is found here:
     ```console
-    ~/robot_manipulator_generator/hand_json_files/example_hand_json/test_hand.json
+    ~/robot_hand_generator/hand_json_files/example_hand_json/test_hand.json
     ```
     An additional script that will simplify the json creation is in the works.
 
@@ -104,7 +104,7 @@ Assuming that you have started and are in the docker container the follow is the
 
 1. Navigate to test_code.
     ```console
-    cd ~/robot_manipulator_generator/test_code/
+    cd ~/robot_hand_generator/test_code/
     ```
 2. Run the test code.
     ```console
