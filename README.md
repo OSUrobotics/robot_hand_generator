@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/449414021.svg)](https://zenodo.org/badge/latestdoi/449414021)
 # robot_hand_generator
 A tool to help in the creation of simplified robot hands to be used in simulation. Primarily for use with mojo grasp.
 
