@@ -3,16 +3,28 @@
         "hand_name" : "test_hand",
         "palm" : {
             "palm_style" : "cuboid",
-            "palm_dimensions" : [2,2,0.5],
+            "palm_dimensions" : [0.50,2.0,0.5],
             "finger_qty" : 2,
             "palm_joints" : {
                 "finger_0" : {
                     "joint_pose" : [0.75, 0, 0],
-                    "joint_style" : "pin"
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1]
                 },
                 "finger_1" : {
-                    "joint_pose" : [0.75, 180, 0],
-                    "joint_style" : "pin"
+                    "joint_pose" : [0.750, 180, -180],
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1]
+                },
+                "finger_2" : {
+                    "joint_pose" : [1.0, 135, -180],
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1]
+                },
+                "finger_3" : {
+                    "joint_pose" : [1, 225, -180],
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1]
                 }
             }
         },
@@ -20,25 +32,32 @@
             "segment_qty" : 2,
             "finger_pose" : [0.75, 0, 0],
             "segment_0" : {
-                "segment_length" : 0.2,
-                "segment_profile" : [0,0],
-                "segment_dimensions" : [0.1],
-                "segment_joint" : {
+                "segment_profile" : [[0.0,0.05,0],[0,0.05,0]],
+                "segment_dimensions" : [0.1 , 0.1, 0.5],
+                "segment_bottom_joint" : {
                     "joint_style" : "pin",
-                    "joint_length" : 0.1,
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_top_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
                     "joint_friction" : "n/a"
                 },
                 "segment_sensors" : {
                     "sensor_qty" : 0
                 }
             },
+           
             "segment_1" : {
-                "segment_length" : 0.2,
-                "segment_profile" : [0,0],
-                "segment_dimensions" : [0.1],
-                "segment_joint" : {
+                "segment_profile" : [[0,0.05,0],[0,0.05,0], [0.00,0.0,0.05], [0.00,0.0,0.05]],
+                "segment_dimensions" : [0.1 , 0.1, 0.5],
+                "segment_bottom_joint" : {
                     "joint_style" : "pin",
-                    "joint_length" : 0.1,
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
                     "joint_friction" : "n/a"
                 },
                 "segment_sensors" : {
@@ -48,14 +67,21 @@
         },
         "finger_1" : {
             "segment_qty" : 2,
-            "finger_pose" : [0.75, 180, 0],
+            "finger_pose" : [0.750, 180, -180],
             "segment_0" : {
                 "segment_length" : 0.2,
-                "segment_profile" : [0,0],
-                "segment_dimensions" : [0.1],
-                "segment_joint" : {
+                "segment_profile" : [[0,0,0],[0,0,0]],
+                "segment_dimensions" : [0.1 , 0.1, 0.5],
+                "segment_bottom_joint" : {
                     "joint_style" : "pin",
-                    "joint_length" : 0.1,
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_top_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
                     "joint_friction" : "n/a"
                 },
                 "segment_sensors" : {
@@ -64,11 +90,106 @@
             },
             "segment_1" : {
                 "segment_length" : 0.2,
-                "segment_profile" : [0,0],
-                "segment_dimensions" : [0.1],
-                "segment_joint" : {
+                "segment_profile" : [[0,0,0],[0,0,0], [0,0,0], [0,0,0]],
+                "segment_dimensions" : [0.1 , 0.1, 0.5],
+                "segment_bottom_joint" : {
                     "joint_style" : "pin",
-                    "joint_length" : 0.1,
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_top_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_sensors" : {
+                    "sensor_qty" : 0
+                }
+            }
+        },
+        "finger_2" : {
+            "segment_qty" : 2,
+            "finger_pose" : [1.0, 135, -180],
+            "segment_0" : {
+                "segment_length" : 0.2,
+                "segment_profile" : [[0,0,0],[0,0,0]],
+                "segment_dimensions" : [0.1 , 0.1, 0.4],
+                "segment_bottom_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_top_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_sensors" : {
+                    "sensor_qty" : 0
+                }
+            },
+            "segment_1" : {
+                "segment_length" : 0.2,
+                "segment_profile" : [[0,0,0],[0,0,0], [0,0,0], [0,0,0]],
+                "segment_dimensions" : [0.1 , 0.1, 0.4],
+                "segment_bottom_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_top_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_sensors" : {
+                    "sensor_qty" : 0
+                }
+            }
+        },
+        "finger_3" : {
+            "segment_qty" : 2,
+            "finger_pose" : [1.0, 225, -180],
+            "segment_0" : {
+                "segment_length" : 0.2,
+                "segment_profile" : [[0,0,0],[0,0,0]],
+                "segment_dimensions" : [0.1 , 0.1, 0.4],
+                "segment_bottom_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_top_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_sensors" : {
+                    "sensor_qty" : 0
+                }
+            },
+            "segment_1" : {
+                "segment_length" : 0.2,
+                "segment_profile" : [[0,0,0],[0,0,0], [0,0,0], [0,0,0]],
+                "segment_dimensions" : [0.1 , 0.1, 0.4],
+                "segment_bottom_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
+                    "joint_friction" : "n/a"
+                },
+                "segment_top_joint" : {
+                    "joint_style" : "pin",
+                    "joint_dimensions" : [0.1 , 0.1, 0.1],
+                    "joint_range" : [0,180],
                     "joint_friction" : "n/a"
                 },
                 "segment_sensors" : {
