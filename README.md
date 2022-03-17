@@ -45,6 +45,14 @@ Docker with linux is the only supported manner wslg should be doable but require
     ```
     Now you are in the container and the manipulator is already setup ready for you to use it.
 
+4. Navigate to the root directory of the repo and do a git pull to ensure the files are up to date:
+    ```console
+    cd ~/robot_manipulator_generator/
+    ```
+    ```console
+    git pull
+    ```
+
 
 ## How to Use:
 Documentation on the different scripts is provided in the /docs directory.
