@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     directory = os.getcwd()
 
-    file_content = read_json("/root/robot_manipulator_generator/src/.user_info.json")
+    file_content = read_json("/root/robot_hand_generator/src/.user_info.json")
     folders = []
     hand_names = []
     for folder in glob.glob(f'{file_content["hand_model_output"]}*/'):
