@@ -14,7 +14,7 @@ RUN /bin/bash -c 'mkdir ~/software; \
     echo "alias blender="~/software/blender-2.93/blender"" >> ~/.bashrc; \
     source ~/.bashrc; \
     sudo apt update; sudo apt install -y python3-pip;\
-    cd ~/ ; git clone https://github.com/JCampbell9/robot_manipulator_generator.git;\
+    cd ~/ ; git clone https://github.com/SoftwareDevEngResearch/robot_hand_generator.git;\
     cd ~/robot_manipulator_generator/; pip3 install -r requirements.txt;\
     pip3 install pybullet;\
     cd ~/software/; git clone https://github.com/bulletphysics/bullet3.git; cd ./bullet3/; python3 setup.py build; python3 setup.py install;\
