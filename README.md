@@ -23,25 +23,25 @@ Docker with linux is the only supported manner wslg should be doable but require
     (assumes you added user to docker group else put sudo infront of docker commands)
 
     ```console
-    docker build -t robot_manipulator_generator https://github.com/JCampbell9/robot_manipulator_generator.git#main:docker_file
+    docker build -t robot_hand_generator https://github.com/JCampbell9/robot_manipulator_generator.git#main:docker_file
     ```
     ```console
     DOCKER_COMMON_ARGS="--gpus all --env=NVIDIA_VISIBLE_DEVICES=all --env=NVIDIA_DRIVER_CAPABILITIES=all --env=DISPLAY --env=QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
     ```
     ```console
-    docker run -it -d --net=host --privileged $DOCKER_COMMON_ARGS --name manipulator_generator
+    docker run -it -d --net=host --privileged $DOCKER_COMMON_ARGS --name hand_generator robot_hand_generator 
     ```
 
-    This will create a docker image called robot_manipulator_generator and a container based off that image called manipulator_generator.
+    This will create a docker image called robot_hand_generator and a container based off that image called hand_generator.
 
 2. To start the container run the following:
     ```console
-    docker start manipulator_generator
+    docker start hand_generator
     ```
 
 3. Attach to the docker container by running:
     ```console
-    docker exec -it manipulator_generator bash
+    docker exec -it hand_generator bash
     ```
     Now you are in the container and the manipulator is already setup ready for you to use it.
 
