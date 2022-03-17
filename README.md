@@ -20,28 +20,34 @@ Docker with linux is the only supported manner wslg should be doable but require
 0. Here is some basic information to get going with docker: https://github.com/OSUrobotics/infrastructure-packages/blob/new_file_structure/docker_setup.md
 
 1. Once docker is setup along with enabling visualization run the following commands:
-    (assumes you added user to docker group else put sudo infront of docker commands)
+    (If you added user to docker group you don't need sudo infront of the docker commands)
 
     ```console
-    docker build -t robot_hand_generator https://github.com/JCampbell9/robot_manipulator_generator.git#main:docker_file
+    sudo docker build -t robot_hand_generator https://github.com/JCampbell9/robot_manipulator_generator.git#main:docker_file
     ```
     ```console
     DOCKER_COMMON_ARGS="--gpus all --env=NVIDIA_VISIBLE_DEVICES=all --env=NVIDIA_DRIVER_CAPABILITIES=all --env=DISPLAY --env=QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
     ```
     ```console
-    docker run -it -d --net=host --privileged $DOCKER_COMMON_ARGS --name hand_generator robot_hand_generator 
+    sudo docker run -it -d --net=host --privileged $DOCKER_COMMON_ARGS --name hand_generator robot_hand_generator 
     ```
 
-    This will create a docker image called robot_hand_generator and a container based off that image called hand_generator.
-
+    * This will create a docker image called robot_hand_generator and a container based off that image called hand_generator.
+    
+    * If you get errors related to device drivers not being selected run this instead: 
+     (Everything will still function, except for you wont be able to use the PyBullet simulation enviroment to check the hand)
+    ```console
+    sudo docker run -it -d --net=host --privileged --name hand_genertor robot_hand_generator
+    ```
+    
 2. To start the container run the following:
     ```console
-    docker start hand_generator
+    sudo docker start hand_generator
     ```
 
 3. Attach to the docker container by running:
     ```console
-    docker exec -it hand_generator bash
+    sudo docker exec -it hand_generator bash
     ```
     Now you are in the container and the manipulator is already setup ready for you to use it.
 
