@@ -24,7 +24,7 @@ Docker with linux is the only supported manner wslg should be doable but require
     (If you added user to docker group you don't need sudo infront of the docker commands)
 
     ```console
-    sudo docker build -t robot_hand_generator https://github.com/SoftwareDevEngResearch/robot_hand_generator.git#main:docker_file
+    sudo docker build -t robot_hand_generator https://github.com/OSUrobotics/robot_hand_generator.git#main:docker_file
     ```
     ```console
     DOCKER_COMMON_ARGS="--gpus all --env=NVIDIA_VISIBLE_DEVICES=all --env=NVIDIA_DRIVER_CAPABILITIES=all --env=DISPLAY --env=QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
