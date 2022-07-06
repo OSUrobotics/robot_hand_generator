@@ -511,7 +511,16 @@ class FingerSegmentGenerator():
 		start_stop_verts = {}
 		width, depth, length = self.segment_dict["segment_dimensions"]
 		bottom_joint_length = self.segment_dict["segment_bottom_joint"]["joint_dimensions"][2]
+		# Calculate the hieght of the curve then subtract that from the segment length so the finger tip is the correct length
+		top_bezier_point1 = self.segment_dict["segment_profile"][2]
+		top_bezier_point2 = self.segment_dict["segment_profile"][3]
+		temp_curve = np.array(HF.bezier_curve([width/2, 0, 0],
+						[width/2 + top_bezier_point1[0], top_bezier_point1[1], top_bezier_point1[2]],
+						[-1*width/2 + top_bezier_point2[0], top_bezier_point2[1], top_bezier_point2[2]],
+						[-1*width/2, 0, 0]))
+		offset = np.max(temp_curve, 0)
 		self.top_length = length + bottom_joint_length
+		offset_length = length - offset[2]
 
 		segment_profiles = self.segment_dict["segment_profile"]
 		bottom_bezier_verts = HF.bezier_curve([width/2, 0, 0],
@@ -521,10 +530,10 @@ class FingerSegmentGenerator():
 		self.verts += bottom_bezier_verts
 		start_stop_verts["bottom_bezier_verts"] = (0, len(self.verts)-1)
 
-		top_bezier_verts = HF.bezier_curve([width/2, 0, length],
-											[segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2] + length],
-											[-1*segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2] + length],
-											[-1*width/2, 0, length])
+		top_bezier_verts = HF.bezier_curve([width/2, 0, offset_length],
+											[segment_profiles[0][0], segment_profiles[0][1], segment_profiles[0][2] + offset_length],
+											[-1*segment_profiles[1][0], segment_profiles[1][1], segment_profiles[1][2] + offset_length],
+											[-1*width/2, 0, offset_length])
 		self.verts += top_bezier_verts
 		start_stop_verts["top_bezier_verts"] = (start_stop_verts["bottom_bezier_verts"][0]+1, len(self.verts)-1)
 		
@@ -534,8 +543,6 @@ class FingerSegmentGenerator():
 				max_y_value = vert[1]
 		remaining_depth = depth - max_y_value
 
-		top_bezier_point1 = self.segment_dict["segment_profile"][2]
-		top_bezier_point2 = self.segment_dict["segment_profile"][3]
 		top_verts = []
 		for vertex in top_bezier_verts:
 			top_verts.append(HF.bezier_curve(

@@ -11,7 +11,7 @@ import pybullet_data
 import os
 import json
 import glob
-
+from math import pi
 class sim_tester():
     """Simulator class to test different hands in."""
 
@@ -37,7 +37,7 @@ class sim_tester():
         cubeStartPos = [0, 0, 1]
         cubeStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 
-        boxId = p.loadURDF(f"{self.gripper_loc}hand/{self.gripper_name}.urdf", useFixedBase=1)
+        boxId = p.loadURDF(f"{self.gripper_loc}hand/{self.gripper_name}.urdf", useFixedBase=1, baseOrientation=p.getQuaternionFromEuler([0, pi/2, pi/2]))
 
         gripper = boxId
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     directory = os.getcwd()
 
-    file_content = read_json("/root/robot_hand_generator/src/.user_info.json")
+    file_content = read_json("./../src/.user_info.json")
     folders = []
     hand_names = []
     for folder in glob.glob(f'{file_content["hand_model_output"]}*/'):
