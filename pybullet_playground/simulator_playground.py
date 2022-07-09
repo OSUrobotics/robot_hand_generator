@@ -37,7 +37,7 @@ class sim_tester():
         cubeStartPos = [0, 0, 1]
         cubeStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 
-        boxId = p.loadURDF(f"{self.gripper_loc}hand/{self.gripper_name}.urdf", useFixedBase=1, baseOrientation=p.getQuaternionFromEuler([0, pi/2, pi/2]))
+        boxId = p.loadURDF(f"{self.gripper_loc}hand/{self.gripper_name}.urdf", useFixedBase=1)#, baseOrientation=p.getQuaternionFromEuler([0, pi/2, pi/2]))
 
         gripper = boxId
 

@@ -14,7 +14,7 @@ import numpy as np
 import os
 import sys
 import json
-from math import sin, cos, tan, pi
+from math import radians, sin, cos, tan, pi
 
 
 
@@ -112,10 +112,10 @@ class HandGenerator():
 			segment0 = finger["segment_0"]
 			previous_height = self.mesh_queue["fingers"][finger_number].segments[0].top_length
 			self.urdf.link(f"finger{finger_number}_segment0")
-			self.urdf.joint(f"finger{finger_number}_segment0_joint", "revolute", f"finger{finger_number}_segment0", "palm", (1,0,0), (0,0,(finger["finger_pose"][2]+180) * pi /180), (finger["finger_pose"][0] * sin(finger["finger_pose"][1]*pi/180), finger["finger_pose"][0] * cos(finger["finger_pose"][1]*pi/180), 0))
+			self.urdf.joint(f"finger{finger_number}_segment0_joint", "revolute", f"finger{finger_number}_segment0", "palm", (0,0,1), (0,0,0), (finger["finger_pose"][0] * cos(finger["finger_pose"][1]*pi/180), 0, finger["finger_pose"][0] * sin(finger["finger_pose"][1]*pi/180))) # (finger["finger_pose"][2]+180) * pi /180 #for the rotation of the finger
 			for segment_number in range(1, finger[f"segment_qty"]):
 				self.urdf.link(f"finger{finger_number}_segment{segment_number}")
-				self.urdf.joint(f"finger{finger_number}_segment{segment_number}_joint", "revolute", f"finger{finger_number}_segment{segment_number}", f"finger{finger_number}_segment{segment_number-1}", (1,0,0), xyz_in=(0,0,previous_height))
+				self.urdf.joint(f"finger{finger_number}_segment{segment_number}_joint", "revolute", f"finger{finger_number}_segment{segment_number}", f"finger{finger_number}_segment{segment_number-1}", (0,0,1), xyz_in=(0,previous_height, 0))
 				previous_height = self.mesh_queue["fingers"][finger_number].segments[segment_number].top_length
 			
 		self.urdf.end_file()
@@ -417,19 +417,20 @@ class FingerGenerator():
 	def main(self):
 		"""Call the segment generator to generate the segments for the finger."""
 		for segment_number in range(self.finger_dict["segment_qty"]):
-			self.segments.append(FingerSegmentGenerator(self.finger_dict[f"segment_{segment_number}"]))
+			self.segments.append(FingerSegmentGenerator(self.finger_dict[f"segment_{segment_number}"], rotate_finger=self.finger_dict["finger_pose"][2]))
 
 
 class FingerSegmentGenerator():
 	"""Generate the finger segment."""
 
-	def __init__(self, segment_dict, run_trigger=True):
+	def __init__(self, segment_dict, rotate_finger=None, run_trigger=True):
 		"""Initialize the FingerSegmentGenerator class.
 
 		Args:
 			segment_dict (Dictionary): A dictionary that describes the segment that is going to be generated
 			run_trigger (bool, optional) : Trigger for auto run or manual run. Defaults to True
 		"""
+		self.rotationg_angle = rotate_finger
 		self.segment_dict = segment_dict
 		self.segment_joint = []
 		self.verts = []
@@ -492,8 +493,9 @@ class FingerSegmentGenerator():
 
 		bezier_y_offset = depth/2 - max_y_value
 		translate = Matrix.Translation(Vector((0.0, bezier_y_offset, bottom_joint_length)))
+		rotate = Matrix.Rotation(radians(self.rotationg_angle), 4, "Z")
 		for i in range(len(self.verts)):
-			self.verts[i] = translate @ self.verts[i]
+			self.verts[i] = rotate @ translate @ self.verts[i]
 		
 		if generate_joints == True:
 			# Calls the joint generator to create the top and bottom portions of the joint
@@ -586,8 +588,9 @@ class FingerSegmentGenerator():
 
 		bezier_y_offset = depth/2 - max_y_value
 		translate = Matrix.Translation(Vector((0.0, bezier_y_offset, bottom_joint_length)))
+		rotate = Matrix.Rotation(radians(self.rotationg_angle),4,"Z")
 		for i in range(len(self.verts)):
-			self.verts[i] = translate @ self.verts[i]
+			self.verts[i] = rotate @ translate @ self.verts[i]
 		
 		if generate_joints == True:	
 			# Calls the joint generator to create the joint on the bottom of the segment
