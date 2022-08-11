@@ -5,10 +5,10 @@ RUN apt install -y nano
 RUN apt install -y usbutils
 RUN apt install -y libxtst6
 RUN apt install -y python-pip
-RUN pip install gdown
+RUN apt install -y wget
 RUN /bin/bash -c 'mkdir ~/software; \
     cd ~/software; \
-    wget 895kxxvztksqcbjmlzyq7jg1flslseru.xz; \
+    wget https://oregonstate.box.com/shared/static/895kxxvztksqcbjmlzyq7jg1flslseru.xz; \
     tar xf 895kxxvztksqcbjmlzyq7jg1flslseru.xz;\
     mv blender-2.93.7-linux-x64 ./blender-2.93; \
     echo "alias blender="~/software/blender-2.93/blender"" >> ~/.bashrc; \
