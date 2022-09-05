@@ -5,7 +5,7 @@
             "palm_style": "cuboid",
             "palm_dimensions": [
                 0.0322,
-                0.1,
+                0.060,
                 0.053
             ],
             "finger_qty": 2,
