@@ -115,5 +115,6 @@ Assuming that you have started and are in the docker container the follow is the
 
 ## Todo:
 
+- Fix the test code to work with the recent updates.
 - Create instruction specific for wslg
 - Create instructions for non-docker install

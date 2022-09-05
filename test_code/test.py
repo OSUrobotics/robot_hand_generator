@@ -205,4 +205,4 @@ if __name__ == '__main__':
 	import generator
 
 	test = TestGenerator()
-	test.main(False)
+	test.main(True)
